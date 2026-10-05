@@ -86,6 +86,9 @@ Puis ouvrir dans votre navigateur : `http://localhost:8000`
 
 ```
 kaya/
+├── .github/
+│   └── workflows/
+│       └── deploy.yml      # Workflow de déploiement automatique sur GitHub Pages
 ├── index.html              # Page principale de visualisation 3D
 ├── embed_example.html      # Exemple d'intégration dans une page web statique
 ├── README.md               # Documentation du projet
@@ -102,6 +105,18 @@ kaya/
 └── scripts/
     └── fetch_data.py       # Script d'extraction et de mise à jour des données OWID
 ```
+
+---
+
+## Déploiement GitHub Pages
+
+Le projet inclut un workflow GitHub Actions automatisé ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)).
+
+Pour activer la publication sur GitHub Pages :
+1. Sur GitHub, rendez-vous dans **Settings** > **Pages** de votre dépôt.
+2. Sous **Build and deployment** > **Source**, choisissez **GitHub Actions**.
+3. À chaque `push` sur la branche `main`, le site sera automatiquement déployé à l'adresse :  
+   👉 **`https://goulu.github.io/kaya/`**
 
 ---
 
