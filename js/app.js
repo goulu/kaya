@@ -61,6 +61,9 @@
       modalZDesc: "Intensité carbone du mix énergétique : masse de CO₂ émise par unité d'énergie consommée (g CO₂ / kWh).",
       modalP2: "Remarquez que le produit des 3 coordonnées de l'espace donne les émissions par habitant :",
       modalP3: "Données issues de <a href=\"https://ourworldindata.org\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: #60a5fa;\">Our World in Data (OWID)</a>.",
+      modalArticleLink: "Voir sur drgoulu.com",
+      modalSourceLink: "Code source",
+      modalLicense: "Licence MIT",
       clearSelection: "Tout effacer",
       removeCountryTitle: "Retirer de la sélection"
     },
@@ -117,6 +120,9 @@
       modalZDesc: "Carbon intensity of energy: mass of CO₂ emitted per unit of energy consumed (g CO₂ / kWh).",
       modalP2: "Note that the product of the 3 spatial coordinates equals emissions per capita:",
       modalP3: "Data from <a href=\"https://ourworldindata.org\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: #60a5fa;\">Our World in Data (OWID)</a>.",
+      modalArticleLink: "View on drgoulu.com",
+      modalSourceLink: "Source code",
+      modalLicense: "MIT License",
       clearSelection: "Clear all",
       removeCountryTitle: "Remove from selection"
     }

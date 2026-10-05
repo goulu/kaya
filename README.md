@@ -93,6 +93,7 @@ kaya/
 ├── index.html              # Main interactive 3D visualization page
 ├── embed_example.html      # Static embed example (iframe demo)
 ├── README.md               # Project documentation
+├── LICENSE                 # MIT License
 ├── css/
 │   └── style.css           # Glassmorphism dark theme and responsive layout
 ├── js/
@@ -128,3 +129,13 @@ To re-fetch and generate fresh data from Our World in Data:
 ```bash
 python3 scripts/fetch_data.py
 ```
+
+---
+
+## License & Links
+
+- 🌐 Article : [Voir sur drgoulu.com](https://drgoulu.com/2026/10/05/kaya-en-3d/)
+- 💻 Code source : [github.com/goulu/kaya](https://github.com/goulu/kaya)
+
+Copyright (c) 2026 Philippe Guglielmetti.  
+This project is licensed under the [MIT License](LICENSE).

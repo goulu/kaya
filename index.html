@@ -16,7 +16,6 @@
     <div class="app-title-row">
       <h1 class="app-title">
         <span data-i18n="appTitle">Identité de Kaya 3D</span>
-        <span class="kaya-badge">OWID Data</span>
       </h1>
       <div style="display: flex; gap: 6px; align-items: center;">
         <button id="btn-lang" class="btn-icon btn-lang" title="Switch language" aria-label="Langue">EN</button>
@@ -99,34 +98,6 @@
     </div>
   </aside>
 
-  <!-- Legend (Bottom Left) -->
-  <footer class="legend-panel glass-panel" aria-label="Légende des coordonnées">
-    <div class="legend-title" data-i18n="legendTitle">Axes de l'espace 3D</div>
-    <div class="legend-axis-list">
-      <div class="legend-axis-item">
-        <span class="axis-badge x">X</span>
-        <div>
-          <span class="axis-desc" data-i18n="legendDescX">PIB / habitant</span>
-          <span class="axis-formula" data-i18n="legendFormulaX">(Niveau de vie moyen, $/hab)</span>
-        </div>
-      </div>
-      <div class="legend-axis-item">
-        <span class="axis-badge y">Y</span>
-        <div>
-          <span class="axis-desc" data-i18n="legendDescY">Énergie / PIB</span>
-          <span class="axis-formula" data-i18n="legendFormulaY">(Intensité énergétique, kWh/$)</span>
-        </div>
-      </div>
-      <div class="legend-axis-item">
-        <span class="axis-badge z">Z</span>
-        <div>
-          <span class="axis-desc" data-i18n="legendDescZ">CO₂ / Énergie</span>
-          <span class="axis-formula" data-i18n="legendFormulaZ">(Intensité carbone, g CO₂/kWh)</span>
-        </div>
-      </div>
-    </div>
-  </footer>
-
   <!-- Hover Tooltip -->
   <div id="tooltip" role="tooltip" aria-hidden="true">
     <div class="tooltip-header">
@@ -178,19 +149,31 @@
         </div>
         <div class="formula-components">
           <div class="formula-comp-item">
-            <b>POP</b>
+            <div class="formula-comp-lead">
+              <span class="axis-badge-empty" aria-hidden="true"></span>
+              <b>POP</b>
+            </div>
             <span data-i18n="modalPopDesc">Population humaine du pays ou de la région.</span>
           </div>
           <div class="formula-comp-item">
-            <b>X = PIB / POP</b>
+            <div class="formula-comp-lead">
+              <span class="axis-badge x">X</span>
+              <b>PIB / POP</b>
+            </div>
             <span data-i18n="modalXDesc">Produit intérieur brut par habitant, mesure standard du niveau de vie moyen ($ constants).</span>
           </div>
           <div class="formula-comp-item">
-            <b>Y = E / PIB</b>
+            <div class="formula-comp-lead">
+              <span class="axis-badge y">Y</span>
+              <b>E / PIB</b>
+            </div>
             <span data-i18n="modalYDesc">Intensité énergétique du PIB : quantité d'énergie nécessaire pour générer un dollar de richesse (kWh / $).</span>
           </div>
           <div class="formula-comp-item">
-            <b>Z = CO₂ / E</b>
+            <div class="formula-comp-lead">
+              <span class="axis-badge z">Z</span>
+              <b>CO₂ / E</b>
+            </div>
             <span data-i18n="modalZDesc">Intensité carbone du mix énergétique : masse de CO₂ émise par unité d'énergie consommée (g CO₂ / kWh).</span>
           </div>
         </div>
@@ -202,6 +185,19 @@
         <p style="font-size: 0.8rem; color: var(--text-muted);" data-i18n-html="modalP3">
           Données issues de <a href="https://ourworldindata.org" target="_blank" rel="noopener noreferrer" style="color: #60a5fa;">Our World in Data (OWID)</a>.
         </p>
+        <div class="modal-footer-divider"></div>
+        <div class="modal-footer-links">
+          <a href="https://drgoulu.com/2026/10/05/kaya-en-3d/" target="_blank" rel="noopener noreferrer" style="color: #60a5fa;">
+            <span data-i18n="modalArticleLink">Voir sur drgoulu.com</span>
+          </a>
+          <span style="color: var(--text-muted);">&bull;</span>
+          <a href="https://github.com/goulu/kaya" target="_blank" rel="noopener noreferrer" style="color: #60a5fa;">
+            <span data-i18n="modalSourceLink">Code source</span>
+          </a>
+        </div>
+        <div class="modal-copyright">
+          © 2026 Philippe Guglielmetti &bull; <a href="LICENSE" target="_blank" rel="noopener noreferrer" style="color: #60a5fa;" data-i18n="modalLicense">Licence MIT</a>
+        </div>
       </div>
     </div>
   </div>
