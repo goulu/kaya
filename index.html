@@ -3,9 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Identité de Kaya - Visualisation 3D Interactive</title>
   <meta name="description" content="Visualisation 3D interactive de chaque pays selon l'identité de Kaya : PIB par habitant, intensité énergétique et intensité carbone de l'énergie.">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=1980_2024">
 </head>
 <body>
   <!-- Top Options Panel (2 Columns) -->
@@ -39,11 +42,11 @@
       <div class="control-group">
         <label>
           <span data-i18n="yearLabel">Année</span>
-          <span id="current-year-display" class="current-year-badge">2000</span>
+          <span id="current-year-display" class="current-year-badge">1980</span>
         </label>
         <div class="timeline-container">
           <button id="btn-play" class="btn-play" title="Lancer / Pause l'animation temporelle" aria-label="Lecture" data-i18n-title="btnPlayTitle">❚❚</button>
-          <input type="range" id="year-slider" class="year-slider" min="2000" max="2022" value="2000" step="1">
+          <input type="range" id="year-slider" class="year-slider" min="1980" max="2024" value="1980" step="1">
         </div>
       </div>
     </div>
@@ -208,7 +211,7 @@
   <!-- Scripts -->
   <script src="vendor/three.min.js"></script>
   <script src="vendor/OrbitControls.js"></script>
-  <script src="data/kaya_data.js"></script>
-  <script src="js/app.js"></script>
+  <script src="data/kaya_data.js?v=1980_2024"></script>
+  <script src="js/app.js?v=1980_2024"></script>
 </body>
 </html>

@@ -157,7 +157,7 @@
   // State
   const state = {
     lang: detectInitialLanguage(),
-    year: 2000,
+    year: 1980,
     metric: 'co2',       // 'pop' | 'co2_pc' | 'co2'
     isPlaying: false,
     selectedCountry: null,
@@ -212,7 +212,7 @@
       data = window.KAYA_DATA;
     } else {
       try {
-        const resp = await fetch('data/kaya_data.json');
+        const resp = await fetch('data/kaya_data.json?v=1980_2024', { cache: 'no-cache' });
         data = await resp.json();
       } catch (err) {
         console.error('Failed to load Kaya data:', err);
@@ -220,7 +220,7 @@
       }
     }
 
-    state.year = data.metadata.min_year || 2000;
+    state.year = data.metadata.min_year || 1980;
     yearSlider.min = data.metadata.min_year;
     yearSlider.max = data.metadata.max_year;
     yearSlider.value = state.year;
@@ -483,8 +483,10 @@
     const sphereGeo = new THREE.SphereGeometry(1, 24, 24);
 
     data.countries.forEach(country => {
-      const yearData = country.data[state.year] || country.data['2022'];
-      if (!yearData) return;
+      // Find initial data for state.year, or any available year to initialize mesh
+      const yearData = country.data[state.year];
+      const anyYearData = yearData || Object.values(country.data)[0];
+      if (!anyYearData) return;
 
       const colorHex = CONTINENT_COLORS[country.region] || CONTINENT_COLORS['Autre'];
 
@@ -500,11 +502,15 @@
       });
 
       const mesh = new THREE.Mesh(sphereGeo, mat);
-      const pos = getCountryPosition(yearData);
+      const pos = getCountryPosition(anyYearData);
       mesh.position.copy(pos);
 
-      const r = getSphereRadius(yearData);
+      const r = getSphereRadius(anyYearData);
       mesh.scale.set(r, r, r);
+
+      // Only display the country if data exists for the considered year and continent is active
+      const isVisible = Boolean(yearData) && state.activeContinents.has(country.region);
+      mesh.visible = isVisible;
 
       mesh.userData = {
         iso: country.iso,
@@ -532,7 +538,7 @@
       if (!mesh) return;
 
       const yearData = country.data[state.year];
-      const visible = yearData && isContinentActive(country.region);
+      const visible = Boolean(yearData) && isContinentActive(country.region);
 
       mesh.visible = visible;
       if (!visible) return;
@@ -550,7 +556,11 @@
     });
 
     if (state.hoveredCountry) {
-      updateTooltipContent(state.hoveredCountry);
+      if (!state.hoveredCountry.visible) {
+        resetHover();
+      } else {
+        updateTooltipContent(state.hoveredCountry);
+      }
     }
   }
 
@@ -746,7 +756,7 @@
   function focusOnCountry(iso) {
     cameraAnimation = null;
     const mesh = countryMeshes.get(iso);
-    if (!mesh) return;
+    if (!mesh || !mesh.visible) return;
 
     controls.target.copy(mesh.position);
     controls.update();

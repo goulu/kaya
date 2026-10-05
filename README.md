@@ -40,7 +40,7 @@ Data is retrieved from official datasets by **Our World in Data (OWID)**:
 - **3D Scene with Three.js**: Orbital mouse rotation, scroll wheel zoom, right-click pan.
 - **Linear scale**: Spatial coordinates directly proportional to the physical Kaya terms.
 - **Bilingual Interface (FR / EN)**: Automatically detects browser language and includes a manual toggle button (`FR` / `EN`).
-- **Animated Timeline (2000 – 2022)**: Interactive year slider and Play/Pause button to observe the historical trajectories of nations.
+- **Animated Timeline (1980 – 2024)**: Interactive year slider and Play/Pause button to observe the historical trajectories of nations.
 - **Hover & Selection**: Detailed glassmorphic tooltip (national flag, GDP/capita, energy intensity, carbon intensity, population, and CO₂ metrics).
 - **Country Search & Comparison**: Search one or several countries (or click directly on spheres); searched countries remain fully opaque while non-searched countries fade to semi-transparency for clear visual comparison.
 - **Continent Filters**: Toggle individual continents on and off.
@@ -99,7 +99,7 @@ kaya/
 ├── js/
 │   └── app.js              # Three.js engine, controls, and multilingual logic
 ├── data/
-│   ├── kaya_data.json      # OWID dataset for 164 countries (2000–2022) in JSON
+│   ├── kaya_data.json      # OWID & World Bank dataset for 164 countries (1980–2024) in JSON
 │   └── kaya_data.js        # Bundled dataset (for local file:// execution without CORS)
 ├── vendor/
 │   ├── three.min.js        # Three.js library (r128)
