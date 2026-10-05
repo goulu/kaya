@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exemple d'intégration statique - Identité de Kaya 3D</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+      color: #1f2937;
+      background: #f9fafb;
+      margin: 0;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 32px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      margin-top: 0;
+      color: #111827;
+      font-size: 1.8rem;
+    }
+
+    p {
+      color: #4b5563;
+    }
+
+    /* Responsive iframe container */
+    .kaya-embed-wrapper {
+      position: relative;
+      width: 100%;
+      height: 640px;
+      margin: 24px 0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .kaya-embed-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    pre {
+      background: #1e293b;
+      color: #f8fafc;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.85rem;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Exemple d'intégration dans une page web statique</h1>
+    <p>
+      Cet exemple montre comment intégrer la visualisation interactive 3D de l'identité de Kaya dans n'importe quel site web statique, blog (Jekyll, Hugo, WordPress, etc.) ou portail documentaire via une simple balise <code>&lt;iframe&gt;</code>.
+    </p>
+
+    <!-- Visualisation intégrée -->
+    <div class="kaya-embed-wrapper">
+      <iframe 
+        class="kaya-embed-iframe" 
+        src="index.html?embed=true" 
+        title="Visualisation 3D de l'Identité de Kaya"
+        loading="lazy"
+        allowfullscreen>
+      </iframe>
+    </div>
+
+    <h2>Code d'intégration HTML</h2>
+    <p>Pour insérer cette visualisation sur votre page statique :</p>
+    <pre><code>&lt;!-- Conteneur responsive pour la visualisation Kaya 3D --&gt;
+&lt;div style="position: relative; width: 100%; height: 600px; border-radius: 10px; overflow: hidden; border: 1px solid #e5e7eb;"&gt;
+  &lt;iframe 
+    src="path/to/kaya/index.html?embed=true" 
+    style="width: 100%; height: 100%; border: none;"
+    title="Visualisation 3D de l'Identité de Kaya"
+    loading="lazy"&gt;
+  &lt;/iframe&gt;
+&lt;/div&gt;</code></pre>
+  </div>
+</body>
+</html>

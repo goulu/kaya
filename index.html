@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Identité de Kaya - Visualisation 3D Interactive</title>
+  <meta name="description" content="Visualisation 3D interactive de chaque pays selon l'identité de Kaya : PIB par habitant, intensité énergétique et intensité carbone de l'énergie.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Three.js Canvas Container -->
+  <div id="canvas-container"></div>
+
+  <!-- Header Overlay -->
+  <header class="app-header glass-panel">
+    <div class="app-title-row">
+      <h1 class="app-title">
+        Identité de Kaya 3D
+        <span class="kaya-badge">OWID Data</span>
+      </h1>
+      <button id="btn-help" class="btn-icon" title="Explication de l'identité de Kaya" aria-label="Aide et formule">ℹ</button>
+    </div>
+    <p class="app-subtitle">
+      Positionnement 3D des pays selon l'équation de Kaya. Rotation à la souris, zoom à la molette.
+    </p>
+  </header>
+
+  <!-- Controls Panel (Top Right) -->
+  <aside class="controls-panel glass-panel" aria-label="Paramètres de visualisation">
+    <!-- Volume of Sphere Metric -->
+    <div class="control-group">
+      <label for="metric-select">Volume de la sphère</label>
+      <select id="metric-select" class="custom-select">
+        <option value="pop" selected>Population (habitants)</option>
+        <option value="co2_pc">Émissions de CO₂ par habitant (t/hab)</option>
+        <option value="co2">Émissions de CO₂ totales (Mt)</option>
+      </select>
+    </div>
+
+    <!-- Scale Mode Toggle -->
+    <div class="control-group">
+      <label>Échelle des axes</label>
+      <div class="segmented-control" role="group" aria-label="Mode d'échelle">
+        <button type="button" class="segmented-btn active" data-scale="log">Logarithmique</button>
+        <button type="button" class="segmented-btn" data-scale="linear">Linéaire</button>
+      </div>
+    </div>
+
+    <!-- Year Slider & Play Animation -->
+    <div class="control-group">
+      <label>
+        <span>Année</span>
+        <span id="current-year-display" class="current-year-badge">2022</span>
+      </label>
+      <div class="timeline-container">
+        <button id="btn-play" class="btn-play" title="Lancer / Pause l'animation temporelle" aria-label="Lecture">▶</button>
+        <input type="range" id="year-slider" class="year-slider" min="2000" max="2022" value="2022" step="1">
+      </div>
+    </div>
+
+    <!-- Country Search -->
+    <div class="control-group">
+      <label for="country-search">Rechercher un pays</label>
+      <input type="text" id="country-search" class="custom-input" placeholder="Ex: France, Chine, Suisse..." list="countries-datalist">
+      <datalist id="countries-datalist"></datalist>
+    </div>
+
+    <!-- Continent Filter -->
+    <div class="control-group">
+      <label>Filtrer par continent</label>
+      <div class="continent-pills">
+        <button type="button" class="continent-pill active" data-continent="Afrique" style="--pill-color: var(--c-afrique);">
+          <span class="pill-dot" style="background: var(--c-afrique);"></span> Afrique
+        </button>
+        <button type="button" class="continent-pill active" data-continent="Amériques" style="--pill-color: var(--c-ameriques);">
+          <span class="pill-dot" style="background: var(--c-ameriques);"></span> Amériques
+        </button>
+        <button type="button" class="continent-pill active" data-continent="Asie" style="--pill-color: var(--c-asie);">
+          <span class="pill-dot" style="background: var(--c-asie);"></span> Asie
+        </button>
+        <button type="button" class="continent-pill active" data-continent="Europe" style="--pill-color: var(--c-europe);">
+          <span class="pill-dot" style="background: var(--c-europe);"></span> Europe
+        </button>
+        <button type="button" class="continent-pill active" data-continent="Océanie" style="--pill-color: var(--c-oceanie);">
+          <span class="pill-dot" style="background: var(--c-oceanie);"></span> Océanie
+        </button>
+      </div>
+    </div>
+
+    <!-- Camera View Presets -->
+    <div class="control-group">
+      <label>Vues de projection</label>
+      <div class="views-row">
+        <button type="button" class="view-btn active" data-view="3d">3D</button>
+        <button type="button" class="view-btn" data-view="xy">X - Y</button>
+        <button type="button" class="view-btn" data-view="xz">X - Z</button>
+        <button type="button" class="view-btn" data-view="yz">Y - Z</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Legend (Bottom Left) -->
+  <footer class="legend-panel glass-panel" aria-label="Légende des coordonnées">
+    <div class="legend-title">Axes de l'espace 3D</div>
+    <div class="legend-axis-list">
+      <div class="legend-axis-item">
+        <span class="axis-badge x">X</span>
+        <div>
+          <span class="axis-desc">PIB / habitant</span>
+          <span class="axis-formula">(Niveau de vie moyen, $/hab)</span>
+        </div>
+      </div>
+      <div class="legend-axis-item">
+        <span class="axis-badge y">Y</span>
+        <div>
+          <span class="axis-desc">Énergie / PIB</span>
+          <span class="axis-formula">(Intensité énergétique, kWh/$)</span>
+        </div>
+      </div>
+      <div class="legend-axis-item">
+        <span class="axis-badge z">Z</span>
+        <div>
+          <span class="axis-desc">CO₂ / Énergie</span>
+          <span class="axis-formula">(Intensité carbone, g CO₂/kWh)</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Hover Tooltip -->
+  <div id="tooltip" role="tooltip" aria-hidden="true">
+    <div class="tooltip-header">
+      <span id="tooltip-flag" class="tooltip-flag">🌐</span>
+      <div class="tooltip-title" id="tooltip-name">Pays</div>
+      <span id="tooltip-continent" class="tooltip-continent">Continent</span>
+    </div>
+    <div class="tooltip-stats">
+      <div class="tooltip-stat-row">
+        <span class="tooltip-stat-label">X (PIB / hab) :</span>
+        <span class="tooltip-stat-val" id="tooltip-x">-</span>
+      </div>
+      <div class="tooltip-stat-row">
+        <span class="tooltip-stat-label">Y (Énergie / PIB) :</span>
+        <span class="tooltip-stat-val" id="tooltip-y">-</span>
+      </div>
+      <div class="tooltip-stat-row">
+        <span class="tooltip-stat-label">Z (CO₂ / Énergie) :</span>
+        <span class="tooltip-stat-val" id="tooltip-z">-</span>
+      </div>
+      <div class="tooltip-stat-row" style="margin-top: 4px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.15);">
+        <span class="tooltip-stat-label">Population :</span>
+        <span class="tooltip-stat-val" id="tooltip-pop">-</span>
+      </div>
+      <div class="tooltip-stat-row">
+        <span class="tooltip-stat-label">CO₂ / habitant :</span>
+        <span class="tooltip-stat-val" id="tooltip-co2-pc">-</span>
+      </div>
+      <div class="tooltip-stat-row">
+        <span class="tooltip-stat-label">CO₂ total :</span>
+        <span class="tooltip-stat-val" id="tooltip-co2-tot">-</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help & Kaya Identity Explainer Modal -->
+  <div id="help-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card glass-panel">
+      <div class="modal-header">
+        <h2 id="modal-title">L'Identité de Kaya</h2>
+        <button id="modal-close" class="modal-close" aria-label="Fermer la fenêtre">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>
+          L'<strong>identité de Kaya</strong> relie les émissions mondiales ou nationales de dioxyde de carbone (CO₂) à des facteurs démographiques, économiques et énergétiques :
+        </p>
+        <div class="formula-box">
+          CO₂ = POP × (PIB / POP) × (E / PIB) × (CO₂ / E)
+        </div>
+        <div class="formula-components">
+          <div class="formula-comp-item">
+            <b>POP</b>
+            <span>Population humaine du pays ou de la région.</span>
+          </div>
+          <div class="formula-comp-item">
+            <b>X = PIB / POP</b>
+            <span>Produit intérieur brut par habitant, mesure standard du niveau de vie moyen ($ constants).</span>
+          </div>
+          <div class="formula-comp-item">
+            <b>Y = E / PIB</b>
+            <span>Intensité énergétique du PIB : quantité d'énergie nécessaire pour générer un dollar de richesse (kWh / $).</span>
+          </div>
+          <div class="formula-comp-item">
+            <b>Z = CO₂ / E</b>
+            <span>Intensité carbone du mix énergétique : masse de CO₂ émise par unité d'énergie consommée (g CO₂ / kWh).</span>
+          </div>
+        </div>
+        <p>
+          Remarquez que le produit des 3 coordonnées de l'espace donne les émissions par habitant :
+          <br>
+          <code>(PIB / POP) × (E / PIB) × (CO₂ / E) = CO₂ / habitant</code>
+        </p>
+        <p style="font-size: 0.8rem; color: var(--text-muted);">
+          Données issues de <a href="https://ourworldindata.org" target="_blank" rel="noopener noreferrer" style="color: #60a5fa;">Our World in Data (OWID)</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/OrbitControls.js"></script>
+  <script src="data/kaya_data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
