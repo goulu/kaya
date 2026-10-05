@@ -443,19 +443,22 @@
   }
 
   // Compute sphere radius based on selected volume metric:
-  // Volume V proportional to value -> Radius r proportional to cbrt(value)
+  // Strict linear volume: Volume V is directly proportional to the value (V = k * val)
+  // Since V = (4/3) * pi * r^3, radius r is strictly proportional to cbrt(val):
+  // r = R_max * (val / maxVal)^(1/3)
   function getSphereRadius(countryRecord) {
     const metric = state.metric;
-    const ranges = data.metadata.ranges[metric];
-    const val = countryRecord[metric] || ranges.min;
+    const maxVal = data.metadata.ranges[metric].max;
+    const val = Math.max(0, countryRecord[metric] || 0);
 
-    const minCbrt = Math.cbrt(ranges.min);
-    const maxCbrt = Math.cbrt(ranges.max);
-    const valCbrt = Math.cbrt(val);
+    // Maximum radius for the country with highest value (China for pop/co2, Qatar/Trinidad for co2_pc)
+    const R_max = (metric === 'co2_pc') ? 5.5 : 7.0;
 
-    const norm = (valCbrt - minCbrt) / (maxCbrt - minCbrt);
-    // Radius between 0.9 and 6.5 units
-    return 0.9 + Math.max(0, norm) * 5.6;
+    // Strict linear volume: V proportional to val => r proportional to cbrt(val)
+    const linearR = R_max * Math.cbrt(val / maxVal);
+
+    // Minor minimum threshold (0.35) so tiny islands remain visible and clickable
+    return Math.max(0.35, linearR);
   }
 
   // Create country spheres
