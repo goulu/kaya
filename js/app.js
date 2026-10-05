@@ -280,18 +280,18 @@
     scene.add(labelsGroup);
   }
 
-  // Create Text Billboards / Sprites
-  function createTextSprite(text, color = '#ffffff', fontSize = 32, fontWeight = 'bold') {
+  // Create Text Billboards / Sprites (doubled size with high-resolution canvas)
+  function createTextSprite(text, color = '#ffffff', fontSize = 56, fontWeight = 'bold', scaleX = 48, scaleY = 12) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    canvas.width = 512;
-    canvas.height = 128;
+    canvas.width = 1024;
+    canvas.height = 256;
 
     ctx.font = `${fontWeight} ${fontSize}px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif`;
     ctx.fillStyle = color;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(text, 256, 64);
+    ctx.fillText(text, 512, 128);
 
     const texture = new THREE.CanvasTexture(canvas);
     texture.minFilter = THREE.LinearFilter;
@@ -301,7 +301,7 @@
       depthWrite: false
     });
     const sprite = new THREE.Sprite(spriteMaterial);
-    sprite.scale.set(24, 6, 1);
+    sprite.scale.set(scaleX, scaleY, 1);
     return sprite;
   }
 
@@ -358,10 +358,10 @@
     const yLine = new THREE.Line(yGeo, new THREE.LineBasicMaterial({ color: 0x10b981, linewidth: 3 }));
     axesGroup.add(yLine);
 
-    // Z Axis line (Cyan/Blue)
+    // Z Axis line (Darker Cobalt Blue)
     const zPoints = [origin, new THREE.Vector3(-halfS, -halfS, halfS + 6)];
     const zGeo = new THREE.BufferGeometry().setFromPoints(zPoints);
-    const zLine = new THREE.Line(zGeo, new THREE.LineBasicMaterial({ color: 0x38bdf8, linewidth: 3 }));
+    const zLine = new THREE.Line(zGeo, new THREE.LineBasicMaterial({ color: 0x1d4ed8, linewidth: 3 }));
     axesGroup.add(zLine);
 
     // Render localized titles & ticks
@@ -374,50 +374,47 @@
 
     const t = I18N[state.lang];
 
-    // Axis Title Sprites
-    const xTitle = createTextSprite(t.axisTitleX, '#f87171', 28);
-    xTitle.position.set(halfS + 14, -halfS - 3, -halfS);
+    // Axis Title Sprites (doubled size: 48x12 scale, 56px font)
+    const xTitle = createTextSprite(t.axisTitleX, '#f87171', 56, 'bold', 48, 12);
+    xTitle.position.set(halfS + 24, -halfS - 5, -halfS);
     labelsGroup.add(xTitle);
 
-    const yTitle = createTextSprite(t.axisTitleY, '#34d399', 28);
-    yTitle.position.set(-halfS - 8, halfS + 12, -halfS);
+    const yTitle = createTextSprite(t.axisTitleY, '#34d399', 56, 'bold', 48, 12);
+    yTitle.position.set(-halfS - 14, halfS + 18, -halfS);
     labelsGroup.add(yTitle);
 
-    const zTitle = createTextSprite(t.axisTitleZ, '#60a5fa', 28);
-    zTitle.position.set(-halfS, -halfS - 3, halfS + 14);
+    const zTitle = createTextSprite(t.axisTitleZ, '#2563eb', 56, 'bold', 48, 12);
+    zTitle.position.set(-halfS, -halfS - 5, halfS + 24);
     labelsGroup.add(zTitle);
 
-    // X Ticks (PIB/hab in $)
+    // X Ticks (PIB/hab in $) - doubled size: 24x6 scale, 40px font
     const xValues = [20000, 40000, 60000, 80000, 100000, 120000];
     xValues.forEach(val => {
       const norm = normalizeValue(val, LINEAR_BOUNDS.x.min, LINEAR_BOUNDS.x.max);
       const posX = -halfS + norm * (halfS * 2);
       const text = `${val / 1000}k$`;
-      const sprite = createTextSprite(text, '#9ca3af', 20, 'normal');
-      sprite.scale.set(12, 3, 1);
-      sprite.position.set(posX, -halfS - 4, -halfS);
+      const sprite = createTextSprite(text, '#9ca3af', 40, 'normal', 24, 6);
+      sprite.position.set(posX, -halfS - 6, -halfS);
       labelsGroup.add(sprite);
     });
 
-    // Y Ticks (Energy / GDP in kWh/$)
+    // Y Ticks (Energy / GDP in kWh/$) - doubled size: 28x6 scale, 40px font
     const yValues = [1.0, 2.0, 3.0, 4.0, 5.0];
     yValues.forEach(val => {
       const norm = normalizeValue(val, LINEAR_BOUNDS.y.min, LINEAR_BOUNDS.y.max);
       const posY = -halfS + norm * (halfS * 2);
-      const sprite = createTextSprite(`${val} kWh`, '#9ca3af', 20, 'normal');
-      sprite.scale.set(14, 3, 1);
-      sprite.position.set(-halfS - 10, posY, -halfS);
+      const sprite = createTextSprite(`${val} kWh`, '#9ca3af', 40, 'normal', 28, 6);
+      sprite.position.set(-halfS - 16, posY, -halfS);
       labelsGroup.add(sprite);
     });
 
-    // Z Ticks (CO2 / Energy in g CO2 / kWh)
+    // Z Ticks (CO2 / Energy in g CO2 / kWh) - doubled size: 24x6 scale, 40px font
     const zValues = [200, 400, 600, 800];
     zValues.forEach(val => {
       const norm = normalizeValue(val, LINEAR_BOUNDS.z.min, LINEAR_BOUNDS.z.max);
       const posZ = -halfS + norm * (halfS * 2);
-      const sprite = createTextSprite(`${val} g`, '#9ca3af', 20, 'normal');
-      sprite.scale.set(12, 3, 1);
-      sprite.position.set(-halfS, -halfS - 4, posZ);
+      const sprite = createTextSprite(`${val} g`, '#9ca3af', 40, 'normal', 24, 6);
+      sprite.position.set(-halfS, -halfS - 6, posZ);
       labelsGroup.add(sprite);
     });
   }

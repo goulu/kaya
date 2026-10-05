@@ -448,7 +448,7 @@ select.custom-select:focus, input.custom-input:focus {
 
 .axis-badge.x { background: #ef4444; color: #fff; }
 .axis-badge.y { background: #10b981; color: #fff; }
-.axis-badge.z { background: #38bdf8; color: #fff; }
+.axis-badge.z { background: #1d4ed8; color: #fff; }
 
 .axis-desc {
   color: #e5e7eb;
