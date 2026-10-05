@@ -8,32 +8,23 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <!-- Three.js Canvas Container -->
-  <div id="canvas-container"></div>
-
-  <!-- Main UI Container (Header & Collapsible Controls) -->
-  <div class="app-ui-container">
-    <header class="app-header glass-panel">
+  <!-- Top Options Panel (2 Columns) -->
+  <header class="top-controls-panel glass-panel" aria-label="Paramètres et options de visualisation">
+    <!-- Column 1: Title, Lang/Help, Volume, Year & Animation -->
+    <div class="panel-col col-primary">
       <div class="app-title-row">
         <h1 class="app-title">
           <span data-i18n="appTitle">Identité de Kaya 3D</span>
         </h1>
-        <div style="display: flex; gap: 6px; align-items: center;">
+        <div class="header-actions">
           <button id="btn-lang" class="btn-icon btn-lang" title="Switch language" aria-label="Langue">EN</button>
           <button id="btn-help" class="btn-icon" title="Explication de l'identité de Kaya" aria-label="Aide et formule" data-i18n-title="btnHelpTitle">ℹ</button>
-          <button id="btn-toggle-controls" class="btn-icon btn-toggle-controls active" title="Afficher / masquer les paramètres" aria-label="Paramètres" data-i18n-title="btnToggleTitle" aria-expanded="true">
-            <span class="btn-toggle-icon">⚙️</span>
-            <span class="btn-toggle-arrow">▼</span>
-          </button>
         </div>
       </div>
       <p class="app-subtitle" data-i18n="appSubtitle">
         Positionnement 3D des pays selon l'équation de Kaya. Rotation à la souris, zoom à la molette.
       </p>
-    </header>
 
-    <!-- Controls Panel (Collapsible) -->
-    <aside id="controls-panel" class="controls-panel glass-panel" aria-label="Paramètres de visualisation">
       <!-- Volume of Sphere Metric -->
       <div class="control-group">
         <label for="metric-select" data-i18n="volumeLabel">Volume de la sphère</label>
@@ -55,7 +46,10 @@
           <input type="range" id="year-slider" class="year-slider" min="2000" max="2022" value="2022" step="1">
         </div>
       </div>
+    </div>
 
+    <!-- Column 2: Country Search, Continent Filter, Projection Views -->
+    <div class="panel-col col-secondary">
       <!-- Country Search -->
       <div class="control-group">
         <label for="country-search" data-i18n="searchLabel">Rechercher un pays</label>
@@ -101,8 +95,11 @@
           <button type="button" class="view-btn" data-view="yz" data-i18n="viewYZ">Y - Z</button>
         </div>
       </div>
-    </aside>
-  </div>
+    </div>
+  </header>
+
+  <!-- Three.js Canvas Container (placed below) -->
+  <main id="canvas-container"></main>
 
   <!-- Hover Tooltip -->
   <div id="tooltip" role="tooltip" aria-hidden="true">

@@ -197,8 +197,6 @@
   const btnLang = document.getElementById('btn-lang');
   const modalHelp = document.getElementById('help-modal');
   const modalClose = document.getElementById('modal-close');
-  const controlsPanel = document.getElementById('controls-panel');
-  const btnToggleControls = document.getElementById('btn-toggle-controls');
 
   // Detect embed mode
   if (window.location.search.includes('embed=true') || window.location.search.includes('embed=1') || window.self !== window.top) {
@@ -1093,45 +1091,6 @@
     modalHelp.addEventListener('click', (e) => {
       if (e.target === modalHelp) modalHelp.classList.remove('open');
     });
-
-    // Collapsible Controls Panel
-    // Phone (<= 768px): closed by default. Computer (> 768px): open by default.
-    const isMobile = window.matchMedia('(max-width: 768px)').matches;
-    let controlsOpen = !isMobile;
-
-    function updateControlsState(animateTransition = true) {
-      if (!controlsPanel || !btnToggleControls) return;
-      if (!animateTransition) {
-        controlsPanel.style.transition = 'none';
-      }
-      if (controlsOpen) {
-        controlsPanel.classList.remove('is-collapsed');
-        btnToggleControls.setAttribute('aria-expanded', 'true');
-        btnToggleControls.classList.add('active');
-        const arrow = btnToggleControls.querySelector('.btn-toggle-arrow');
-        if (arrow) arrow.textContent = '▲';
-      } else {
-        controlsPanel.classList.add('is-collapsed');
-        btnToggleControls.setAttribute('aria-expanded', 'false');
-        btnToggleControls.classList.remove('active');
-        const arrow = btnToggleControls.querySelector('.btn-toggle-arrow');
-        if (arrow) arrow.textContent = '▼';
-      }
-      if (!animateTransition) {
-        void controlsPanel.offsetHeight; // trigger reflow
-        controlsPanel.style.transition = '';
-      }
-      setTimeout(onWindowResize, 60);
-      setTimeout(onWindowResize, 350);
-    }
-
-    if (btnToggleControls) {
-      updateControlsState(false);
-      btnToggleControls.addEventListener('click', () => {
-        controlsOpen = !controlsOpen;
-        updateControlsState(true);
-      });
-    }
 
     // ResizeObserver on canvas container
     if (window.ResizeObserver && container) {

@@ -27,33 +27,14 @@
 html, body {
   width: 100%;
   height: 100%;
+  height: 100dvh;
   overflow: hidden;
   background-color: var(--bg-color);
   color: var(--text-main);
   font-family: var(--font-family);
   user-select: none;
-}
-
-#canvas-container {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1;
-  touch-action: none;
-}
-
-#canvas-container canvas {
-  width: 100% !important;
-  height: 100% !important;
-  display: block;
-  touch-action: none;
-  cursor: grab;
-}
-
-#canvas-container canvas:active {
-  cursor: grabbing;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Glassmorphism panel base */
@@ -62,34 +43,32 @@ html, body {
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--panel-border);
-  border-radius: 12px;
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
-  pointer-events: auto;
 }
 
-/* UI Container (Header & Collapsible Controls) */
-.app-ui-container {
-  position: absolute;
-  top: 16px;
-  left: 16px;
+/* Top Controls Panel (2 Columns) */
+.top-controls-panel {
+  width: 100%;
+  flex-shrink: 0;
   z-index: 10;
-  width: 330px;
-  max-width: calc(100vw - 32px);
-  max-height: calc(100vh - 32px);
+  padding: 10px 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+  border-radius: 0;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 1px solid var(--panel-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.panel-col {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  pointer-events: none;
-}
-
-header.app-header {
-  position: relative;
-  top: 0;
-  left: 0;
-  width: 100%;
-  max-width: none;
-  padding: 12px 16px;
-  pointer-events: auto;
+  min-width: 0;
 }
 
 .app-title-row {
@@ -99,8 +78,14 @@ header.app-header {
   gap: 10px;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 h1.app-title {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 700;
   letter-spacing: -0.01em;
   color: #fff;
@@ -110,10 +95,10 @@ h1.app-title {
 }
 
 p.app-subtitle {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--text-muted);
-  margin-top: 4px;
-  line-height: 1.35;
+  margin-top: 1px;
+  line-height: 1.3;
 }
 
 .btn-icon {
@@ -147,77 +132,37 @@ p.app-subtitle {
   padding: 0;
 }
 
-.btn-toggle-controls {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  cursor: pointer;
-}
-
-.btn-toggle-icon {
-  font-size: 0.82rem;
-  line-height: 1;
-}
-
-.btn-toggle-arrow {
-  font-size: 0.62rem;
-  transition: transform 0.25s ease;
-  line-height: 1;
-  color: var(--text-muted);
-}
-
-.btn-toggle-controls.active .btn-toggle-arrow {
-  transform: rotate(180deg);
-}
-
-/* Controls Panel (Collapsible) */
-.controls-panel {
-  position: relative;
-  top: 0;
-  left: 0;
+/* Three.js Canvas Container - placed below */
+#canvas-container {
   width: 100%;
-  padding: 14px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 13px;
-  pointer-events: auto;
-  max-height: calc(100vh - 160px);
-  overflow-y: auto;
-  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, padding 0.3s ease, margin 0.3s ease;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-}
-
-.controls-panel::-webkit-scrollbar {
-  width: 5px;
-}
-
-.controls-panel::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-}
-
-.controls-panel.is-collapsed {
-  max-height: 0;
-  opacity: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-  margin-top: 0;
-  margin-bottom: 0;
-  border-width: 0;
-  pointer-events: none;
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  z-index: 1;
+  touch-action: none;
   overflow: hidden;
+}
+
+#canvas-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  touch-action: none;
+  cursor: grab;
+}
+
+#canvas-container canvas:active {
+  cursor: grabbing;
 }
 
 .control-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .control-group label {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -394,21 +339,24 @@ select.custom-select:focus, input.custom-input:focus {
 
 /* View presets */
 .views-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
+  flex-wrap: wrap;
   gap: 4px;
 }
 
 .view-btn {
+  flex: 1 1 calc(25% - 4px);
+  min-width: 56px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text-muted);
-  font-size: 0.7rem;
-  padding: 5px 2px;
+  font-size: 0.72rem;
+  padding: 5px 4px;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
   text-align: center;
+  white-space: nowrap;
 }
 
 .view-btn:hover {
@@ -427,12 +375,14 @@ select.custom-select:focus, input.custom-input:focus {
 .continent-pills {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
 }
 
 .continent-pill {
+  flex: 1 1 auto;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
   font-size: 0.72rem;
   padding: 4px 8px;
@@ -442,6 +392,7 @@ select.custom-select:focus, input.custom-input:focus {
   cursor: pointer;
   color: var(--text-muted);
   transition: all 0.2s;
+  white-space: nowrap;
 }
 
 .continent-pill:hover {
@@ -696,71 +647,153 @@ select.custom-select:focus, input.custom-input:focus {
 }
 
 /* Embed Mode overrides */
-body.is-embedded .app-ui-container {
-  top: 8px;
-  left: 8px;
-  width: 290px;
+body.is-embedded .top-controls-panel {
+  padding: 6px 14px;
+  gap: 14px;
 }
 
 body.is-embedded h1.app-title {
   font-size: 0.95rem;
 }
 
-/* Responsive / Mobile layout */
-@media (max-width: 768px) {
-  .app-ui-container {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    right: 10px;
-    width: auto;
-    max-width: none;
-    max-height: calc(100vh - 20px);
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    pointer-events: none;
+/* Responsive / Compact layout */
+
+/* From 850px down to 401px: keep 2 columns side-by-side, stacking buttons progressively */
+@media (max-width: 850px) {
+  .top-controls-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 8px 12px;
+    max-height: 50vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
   }
 
-  header.app-header {
-    pointer-events: auto;
-    width: 100%;
-    padding: 10px 14px;
+  .top-controls-panel::-webkit-scrollbar {
+    width: 4px;
   }
 
-  .app-title-row {
-    gap: 8px;
+  .top-controls-panel::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
   }
 
   h1.app-title {
-    font-size: 1.05rem;
+    font-size: 1rem;
   }
 
   p.app-subtitle {
+    display: none;
+  }
+
+  .panel-col {
+    gap: 6px;
+  }
+
+  /* Stack projection buttons 2x2 */
+  .views-row .view-btn {
+    flex: 1 1 calc(50% - 4px);
+  }
+
+  /* Stack continent buttons 3 + 2 */
+  .continent-pills .continent-pill {
+    flex: 1 1 calc(33.333% - 4px);
+  }
+}
+
+/* Down to ~400px: stack buttons maximally (2x2) and optimize compact spacing so both columns stay side-by-side */
+@media (max-width: 600px) {
+  .top-controls-panel {
+    gap: 8px;
+    padding: 6px 8px;
+  }
+
+  h1.app-title {
+    font-size: 0.85rem;
+    line-height: 1.15;
+  }
+
+  .btn-icon {
+    min-width: 25px;
+    width: 25px;
+    height: 25px;
+    font-size: 0.75rem;
+    border-radius: 6px;
+  }
+
+  .btn-lang {
+    width: 25px;
+    font-size: 0.68rem;
+  }
+
+  .control-group label {
+    font-size: 0.66rem;
+    margin-bottom: 1px;
+  }
+
+  select.custom-select, input.custom-input {
     font-size: 0.72rem;
-    margin-top: 2px;
-    line-height: 1.25;
+    padding: 4px 6px;
+    border-radius: 6px;
   }
 
-  .controls-panel {
-    pointer-events: auto;
-    width: 100%;
-    max-height: calc(100vh - 110px);
-    overflow-y: auto;
-    padding: 12px 14px;
-    gap: 11px;
+  .timeline-container {
+    gap: 6px;
   }
 
-  .controls-panel.is-collapsed {
-    max-height: 0;
-    opacity: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    margin-top: 0;
-    margin-bottom: 0;
-    border: none;
-    pointer-events: none;
+  .btn-play {
+    width: 26px;
+    height: 26px;
+    font-size: 0.7rem;
+  }
+
+  .current-year-badge {
+    font-size: 0.78rem;
+  }
+
+  /* Continent pills stacked 2 per row */
+  .continent-pills .continent-pill {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 0;
+    padding: 3px 5px;
+    font-size: 0.68rem;
+    gap: 4px;
+  }
+
+  .continent-pill .pill-dot {
+    width: 6px;
+    height: 6px;
+  }
+
+  .continent-pill span:last-child {
     overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Views buttons stacked 2x2 */
+  .views-row .view-btn {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 0;
+    padding: 4px 2px;
+    font-size: 0.68rem;
+  }
+}
+
+/* Below ~400px: only now stack one column under the other */
+@media (max-width: 400px) {
+  .top-controls-panel {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 8px 10px;
+    max-height: 55vh;
+  }
+
+  .continent-pills .continent-pill {
+    flex: 1 1 calc(50% - 4px);
+  }
+
+  .views-row .view-btn {
+    flex: 1 1 calc(50% - 4px);
   }
 }
