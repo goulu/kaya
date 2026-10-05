@@ -1,10 +1,136 @@
 /**
- * Kaya 3D - Visualisation 3D de l'Identité de Kaya
+ * Kaya 3D - Visualisation 3D de l'Identité de Kaya / 3D Visualization of the Kaya Identity
  * Based on Our World in Data (OWID) and Three.js
  */
 
 (function () {
   'use strict';
+
+  // Translations
+  const I18N = {
+    fr: {
+      pageTitle: "Identité de Kaya - Visualisation 3D Interactive",
+      pageDesc: "Visualisation 3D interactive de chaque pays selon l'identité de Kaya : PIB par habitant, intensité énergétique et intensité carbone de l'énergie.",
+      appTitle: "Identité de Kaya 3D",
+      appSubtitle: "Positionnement 3D des pays selon l'équation de Kaya. Rotation à la souris, zoom à la molette.",
+      btnHelpTitle: "Explication de l'identité de Kaya",
+      btnLangNext: "EN",
+      btnLangTitle: "Switch to English",
+      volumeLabel: "Volume de la sphère",
+      optPop: "Population (habitants)",
+      optCo2Pc: "Émissions de CO₂ par habitant (t/hab)",
+      optCo2Tot: "Émissions de CO₂ totales (Mt)",
+      yearLabel: "Année",
+      btnPlayTitle: "Lancer / Pause l'animation temporelle",
+      searchLabel: "Rechercher un pays",
+      searchPlaceholder: "Ex: France, Chine, Suisse...",
+      continentsLabel: "Filtrer par continent",
+      continent_Afrique: "Afrique",
+      continent_Amériques: "Amériques",
+      continent_Asie: "Asie",
+      continent_Europe: "Europe",
+      continent_Océanie: "Océanie",
+      viewsLabel: "Vues de projection",
+      view3d: "3D",
+      viewXY: "X - Y",
+      viewXZ: "X - Z",
+      viewYZ: "Y - Z",
+      legendTitle: "Axes de l'espace 3D",
+      legendDescX: "PIB / habitant",
+      legendFormulaX: "(Niveau de vie moyen, $/hab)",
+      legendDescY: "Énergie / PIB",
+      legendFormulaY: "(Intensité énergétique, kWh/$)",
+      legendDescZ: "CO₂ / Énergie",
+      legendFormulaZ: "(Intensité carbone, g CO₂/kWh)",
+      axisTitleX: "X : PIB / habitant ($)",
+      axisTitleY: "Y : Intensité Énergétique (kWh/$)",
+      axisTitleZ: "Z : Intensité Carbone (g CO₂/kWh)",
+      unitX: "$/hab",
+      unitY: "kWh/$",
+      unitZ: "g/kWh",
+      unitCo2Pc: "t/hab",
+      unitCo2Tot: "Mt",
+      tooltipPopLabel: "Population :",
+      tooltipCo2PcLabel: "CO₂ / habitant :",
+      tooltipCo2TotLabel: "CO₂ total :",
+      modalTitle: "L'Identité de Kaya",
+      modalP1: "L'<strong>identité de Kaya</strong> relie les émissions mondiales ou nationales de dioxyde de carbone (CO₂) à des facteurs démographiques, économiques et énergétiques :",
+      modalPopDesc: "Population humaine du pays ou de la région.",
+      modalXDesc: "Produit intérieur brut par habitant, mesure standard du niveau de vie moyen ($ constants).",
+      modalYDesc: "Intensité énergétique du PIB : quantité d'énergie nécessaire pour générer un dollar de richesse (kWh / $).",
+      modalZDesc: "Intensité carbone du mix énergétique : masse de CO₂ émise par unité d'énergie consommée (g CO₂ / kWh).",
+      modalP2: "Remarquez que le produit des 3 coordonnées de l'espace donne les émissions par habitant :",
+      modalP3: "Données issues de <a href=\"https://ourworldindata.org\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: #60a5fa;\">Our World in Data (OWID)</a>."
+    },
+    en: {
+      pageTitle: "Kaya Identity - 3D Interactive Visualization",
+      pageDesc: "Interactive 3D visualization of countries following the Kaya identity: GDP per capita, energy intensity, and carbon intensity of energy.",
+      appTitle: "Kaya Identity 3D",
+      appSubtitle: "3D positioning of countries according to the Kaya equation. Left drag to rotate, wheel to zoom.",
+      btnHelpTitle: "Explanation of the Kaya identity",
+      btnLangNext: "FR",
+      btnLangTitle: "Passer en Français",
+      volumeLabel: "Sphere volume",
+      optPop: "Population (people)",
+      optCo2Pc: "CO₂ emissions per capita (t/person)",
+      optCo2Tot: "Total CO₂ emissions (Mt)",
+      yearLabel: "Year",
+      btnPlayTitle: "Play / Pause timeline animation",
+      searchLabel: "Search country",
+      searchPlaceholder: "Ex: France, China, United States...",
+      continentsLabel: "Filter by continent",
+      continent_Afrique: "Africa",
+      continent_Amériques: "Americas",
+      continent_Asie: "Asia",
+      continent_Europe: "Europe",
+      continent_Océanie: "Oceania",
+      viewsLabel: "Projection views",
+      view3d: "3D",
+      viewXY: "X - Y",
+      viewXZ: "X - Z",
+      viewYZ: "Y - Z",
+      legendTitle: "3D Coordinate Axes",
+      legendDescX: "GDP / capita",
+      legendFormulaX: "(Living standards, $/person)",
+      legendDescY: "Energy / GDP",
+      legendFormulaY: "(Energy intensity, kWh/$)",
+      legendDescZ: "CO₂ / Energy",
+      legendFormulaZ: "(Carbon intensity, g CO₂/kWh)",
+      axisTitleX: "X: GDP / capita ($)",
+      axisTitleY: "Y: Energy Intensity (kWh/$)",
+      axisTitleZ: "Z: Carbon Intensity (g CO₂/kWh)",
+      unitX: "$/person",
+      unitY: "kWh/$",
+      unitZ: "g/kWh",
+      unitCo2Pc: "t/person",
+      unitCo2Tot: "Mt",
+      tooltipPopLabel: "Population:",
+      tooltipCo2PcLabel: "CO₂ / capita:",
+      tooltipCo2TotLabel: "Total CO₂:",
+      modalTitle: "The Kaya Identity",
+      modalP1: "The <strong>Kaya identity</strong> expresses total carbon dioxide (CO₂) emissions as the product of demographic, economic, and energy factors:",
+      modalPopDesc: "Human population of the country or region.",
+      modalXDesc: "Gross domestic product per capita, a standard metric of living standards (constant $).",
+      modalYDesc: "Energy intensity of GDP: amount of energy needed to generate one dollar of GDP (kWh / $).",
+      modalZDesc: "Carbon intensity of energy: mass of CO₂ emitted per unit of energy consumed (g CO₂ / kWh).",
+      modalP2: "Note that the product of the 3 spatial coordinates equals emissions per capita:",
+      modalP3: "Data from <a href=\"https://ourworldindata.org\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: #60a5fa;\">Our World in Data (OWID)</a>."
+    }
+  };
+
+  // Detect language: URL param -> localStorage -> browser language
+  function detectInitialLanguage() {
+    const urlParam = new URLSearchParams(window.location.search).get('lang');
+    if (urlParam && (urlParam === 'fr' || urlParam === 'en')) {
+      return urlParam;
+    }
+    const stored = localStorage.getItem('kaya_lang');
+    if (stored && (stored === 'fr' || stored === 'en')) {
+      return stored;
+    }
+    const browserLang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    return browserLang.startsWith('fr') ? 'fr' : 'en';
+  }
 
   // Continent color mapping
   const CONTINENT_COLORS = {
@@ -18,6 +144,7 @@
 
   // State
   const state = {
+    lang: detectInitialLanguage(),
     year: 2022,
     metric: 'pop',       // 'pop' | 'co2_pc' | 'co2'
     isPlaying: false,
@@ -52,6 +179,7 @@
   const countrySearch = document.getElementById('country-search');
   const datalistCountries = document.getElementById('countries-datalist');
   const btnHelp = document.getElementById('btn-help');
+  const btnLang = document.getElementById('btn-lang');
   const modalHelp = document.getElementById('help-modal');
   const modalClose = document.getElementById('modal-close');
 
@@ -87,7 +215,9 @@
     setupAxesAndGrids();
     createCountrySpheres();
     setupEventListeners();
-    populateSearchList();
+
+    // Apply active language to DOM and 3D labels
+    applyLanguage(state.lang);
 
     animate();
   }
@@ -228,24 +358,29 @@
     const zLine = new THREE.Line(zGeo, new THREE.LineBasicMaterial({ color: 0x38bdf8, linewidth: 3 }));
     axesGroup.add(zLine);
 
+    // Render localized titles & ticks
+    createAxisLabelsAndTicks(halfS);
+  }
+
+  function createAxisLabelsAndTicks(halfS) {
+    // Clear previous label sprites
+    while (labelsGroup.children.length) labelsGroup.remove(labelsGroup.children[0]);
+
+    const t = I18N[state.lang];
+
     // Axis Title Sprites
-    const xTitle = createTextSprite('X : PIB / habitant ($)', '#f87171', 28);
+    const xTitle = createTextSprite(t.axisTitleX, '#f87171', 28);
     xTitle.position.set(halfS + 14, -halfS - 3, -halfS);
     labelsGroup.add(xTitle);
 
-    const yTitle = createTextSprite('Y : Intensité Énergétique (kWh/$)', '#34d399', 28);
+    const yTitle = createTextSprite(t.axisTitleY, '#34d399', 28);
     yTitle.position.set(-halfS - 8, halfS + 12, -halfS);
     labelsGroup.add(yTitle);
 
-    const zTitle = createTextSprite('Z : Intensité Carbone (g CO₂/kWh)', '#60a5fa', 28);
+    const zTitle = createTextSprite(t.axisTitleZ, '#60a5fa', 28);
     zTitle.position.set(-halfS, -halfS - 3, halfS + 14);
     labelsGroup.add(zTitle);
 
-    // Tick labels based on linear vs log
-    createAxisTicks(origin, halfS);
-  }
-
-  function createAxisTicks(origin, halfS) {
     // X Ticks (PIB/hab in $)
     const xValues = [20000, 40000, 60000, 80000, 100000, 120000];
     xValues.forEach(val => {
@@ -347,6 +482,7 @@
         name: country.name,
         name_en: country.name_en,
         region: country.region,
+        region_en: country.region_en,
         flag: country.flag,
         targetPos: pos.clone(),
         targetScale: r,
@@ -358,7 +494,7 @@
     });
   }
 
-  // Update spheres when year, metric or scale changes
+  // Update spheres when year, metric or active continents change
   function updateCountrySpheres(immediate = false) {
     const isContinentActive = (region) => state.activeContinents.has(region);
 
@@ -439,12 +575,6 @@
     document.body.style.cursor = 'default';
   }
 
-  function onPointerClick() {
-    if (state.hoveredCountry) {
-      focusOnCountry(state.hoveredCountry.userData.iso);
-    }
-  }
-
   function positionTooltip(clientX, clientY) {
     tooltip.style.left = `${clientX}px`;
     tooltip.style.top = `${clientY - 12}px`;
@@ -457,6 +587,10 @@
     const yearData = country.data[state.year];
     if (!yearData) return;
 
+    const t = I18N[state.lang];
+    const isEn = state.lang === 'en';
+    const numLocale = isEn ? 'en-US' : 'fr-FR';
+
     const flagEl = document.getElementById('tooltip-flag');
     const nameEl = document.getElementById('tooltip-name');
     const continentEl = document.getElementById('tooltip-continent');
@@ -468,17 +602,17 @@
     const co2TotValEl = document.getElementById('tooltip-co2-tot');
 
     flagEl.textContent = country.flag || '🌐';
-    nameEl.textContent = country.name;
-    continentEl.textContent = country.region;
+    nameEl.textContent = isEn ? (country.name_en || country.name) : country.name;
+    continentEl.textContent = isEn ? (country.region_en || country.region) : country.region;
     continentEl.style.backgroundColor = `rgba(${hexToRgb(mesh.userData.colorHex)}, 0.25)`;
     continentEl.style.color = `#${mesh.userData.colorHex.toString(16).padStart(6, '0')}`;
 
-    xValEl.textContent = `${yearData.x.toLocaleString('fr-FR')} $/hab`;
-    yValEl.textContent = `${yearData.y.toLocaleString('fr-FR')} kWh/$`;
-    zValEl.textContent = `${yearData.z.toLocaleString('fr-FR')} g/kWh`;
-    popValEl.textContent = yearData.pop.toLocaleString('fr-FR');
-    co2PcValEl.textContent = `${yearData.co2_pc.toLocaleString('fr-FR')} t/hab`;
-    co2TotValEl.textContent = `${yearData.co2.toLocaleString('fr-FR')} Mt`;
+    xValEl.textContent = `${yearData.x.toLocaleString(numLocale)} ${t.unitX}`;
+    yValEl.textContent = `${yearData.y.toLocaleString(numLocale)} ${t.unitY}`;
+    zValEl.textContent = `${yearData.z.toLocaleString(numLocale)} ${t.unitZ}`;
+    popValEl.textContent = yearData.pop.toLocaleString(numLocale);
+    co2PcValEl.textContent = `${yearData.co2_pc.toLocaleString(numLocale)} ${t.unitCo2Pc}`;
+    co2TotValEl.textContent = `${yearData.co2.toLocaleString(numLocale)} ${t.unitCo2Tot}`;
   }
 
   function hexToRgb(hex) {
@@ -536,11 +670,85 @@
   // Search autocomplete setup
   function populateSearchList() {
     datalistCountries.innerHTML = '';
+    const isEn = state.lang === 'en';
     data.countries.forEach(country => {
       const opt = document.createElement('option');
-      opt.value = country.name;
+      opt.value = isEn ? (country.name_en || country.name) : country.name;
       datalistCountries.appendChild(opt);
     });
+  }
+
+  // Language management
+  function applyLanguage(lang) {
+    if (!I18N[lang]) lang = 'fr';
+    state.lang = lang;
+    localStorage.setItem('kaya_lang', lang);
+    document.documentElement.lang = lang;
+
+    const t = I18N[lang];
+
+    // Document head
+    document.title = t.pageTitle;
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.content = t.pageDesc;
+
+    // Static text nodes with data-i18n
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.dataset.i18n;
+      if (t[key] !== undefined) {
+        el.textContent = t[key];
+      }
+    });
+
+    // Static HTML nodes with data-i18n-html
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      const key = el.dataset.i18nHtml;
+      if (t[key] !== undefined) {
+        el.innerHTML = t[key];
+      }
+    });
+
+    // Titles / tooltips
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      const key = el.dataset.i18nTitle;
+      if (t[key] !== undefined) {
+        el.title = t[key];
+      }
+    });
+
+    // Placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const key = el.dataset.i18nPlaceholder;
+      if (t[key] !== undefined) {
+        el.placeholder = t[key];
+      }
+    });
+
+    // Language toggle button text and title
+    if (btnLang) {
+      btnLang.textContent = t.btnLangNext;
+      btnLang.title = t.btnLangTitle;
+    }
+
+    // Update 3D axis title sprites
+    if (labelsGroup) {
+      createAxisLabelsAndTicks(state.boxSize / 2);
+    }
+
+    // Refresh datalist options in the selected language
+    if (data) {
+      populateSearchList();
+    }
+
+    // Refresh tooltip if visible
+    if (state.hoveredCountry) {
+      updateTooltipContent(state.hoveredCountry);
+    }
+  }
+
+  function toggleLanguage() {
+    const nextLang = state.lang === 'fr' ? 'en' : 'fr';
+    applyLanguage(nextLang);
   }
 
   // Year timeline play/pause
@@ -595,6 +803,11 @@
       }
     });
 
+    // Language switcher button
+    if (btnLang) {
+      btnLang.addEventListener('click', toggleLanguage);
+    }
+
     // Year slider
     yearSlider.addEventListener('input', (e) => {
       if (state.isPlaying) togglePlay();
@@ -609,7 +822,6 @@
       state.metric = e.target.value;
       updateCountrySpheres();
     });
-
 
     // View buttons
     document.querySelectorAll('[data-view]').forEach(btn => {
@@ -633,14 +845,14 @@
       });
     });
 
-    // Country Search
+    // Country Search (matches French name, English name, and ISO code)
     countrySearch.addEventListener('input', (e) => {
       const q = e.target.value.trim().toLowerCase();
       if (!q) return;
 
       const match = data.countries.find(c => 
-        c.name.toLowerCase() === q || 
-        c.name_en.toLowerCase() === q || 
+        (c.name && c.name.toLowerCase() === q) || 
+        (c.name_en && c.name_en.toLowerCase() === q) || 
         c.iso.toLowerCase() === q
       );
 

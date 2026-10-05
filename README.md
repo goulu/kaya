@@ -1,32 +1,32 @@
-# Visualisation 3D de l'Identité de Kaya
+# 3D Visualization of the Kaya Identity
 
-Visualisation interactive 3D de chaque pays selon l'[identité de Kaya](https://fr.wikipedia.org/wiki/Identit%C3%A9_de_Kaya).
+Interactive 3D visualization of countries based on the [Kaya Identity](https://en.wikipedia.org/wiki/Kaya_identity).
 
-$$ \displaystyle \mathrm {CO} _{2}=\mathrm {POP} \times {\frac {\mathrm {PIB} }{\mathrm {POP} }}\times {\frac {\mathrm {E} }{\mathrm {PIB} }}\times {\frac {\mathrm {CO} _{2}}{\mathrm {E} }} $$
+$$ \displaystyle \mathrm {CO} _{2}=\mathrm {POP} \times {\frac {\mathrm {GDP} }{\mathrm {POP} }}\times {\frac {\mathrm {E} }{\mathrm {GDP} }}\times {\frac {\mathrm {CO} _{2}}{\mathrm {E} }} $$
 
-Chaque pays est représenté par une sphère aux coordonnées 3D :
+Each country is represented by a sphere in a 3D coordinate system:
 
-- **X = PIB / POP** : produit intérieur brut par habitant, une mesure du niveau de vie moyen ($ constants / hab) ;
-- **Y = E / PIB** : intensité énergétique du PIB, la quantité d'énergie utilisée pour produire un dollar de biens ou services (kWh / $) ;
-- **Z = CO2 / E** : intensité carbone de l'énergie, la quantité de CO2 émise pour disposer d'une quantité d'énergie donnée (g CO₂ / kWh).
+- **X = GDP / POP**: Gross Domestic Product per capita, a measure of average living standards (constant $ / person);
+- **Y = E / GDP**: Energy intensity of GDP, the amount of energy used to produce one dollar of economic output (kWh / $);
+- **Z = CO2 / E**: Carbon intensity of energy, the quantity of CO2 emitted per unit of energy consumed (g CO₂ / kWh).
 
-Le **volume de la sphère** peut être choisi dynamiquement entre :
-1. **POPulation** (nombre d'habitants)
-2. **Émission de CO₂ par habitant** (tonnes de CO₂ / hab)
-3. **Émission de CO₂ totale** (millions de tonnes de CO₂)
+The **volume of each sphere** can be dynamically toggled between:
+1. **Population** (number of people)
+2. **CO₂ emissions per capita** (tonnes of CO₂ / person)
+3. **Total CO₂ emissions** (million tonnes of CO₂)
 
-La **couleur de la sphère** dépend du continent :
-- 🟡 **Afrique** (`#f59e0b`)
-- 🔴 **Amériques** (`#ef4444`)
-- 🟢 **Asie** (`#10b981`)
+The **color of each sphere** corresponds to its continent:
+- 🟡 **Africa** (`#f59e0b`)
+- 🔴 **Americas** (`#ef4444`)
+- 🟢 **Asia** (`#10b981`)
 - 🔵 **Europe** (`#38bdf8`)
-- 🟣 **Océanie** (`#a855f7`)
+- 🟣 **Oceania** (`#a855f7`)
 
 ---
 
-## Sources des données
+## Data Sources
 
-Les données proviennent des séries officielles de **Our World in Data (OWID)** :
+Data is retrieved from official datasets by **Our World in Data (OWID)**:
 
 - GDP per capita: [OWID - GDP per capita](https://ourworldindata.org/gdp-per-capita)
 - Energy intensity of GDP: [OWID - Energy intensity of GDP](https://ourworldindata.org/energy-intensity-of-gdp)
@@ -35,96 +35,96 @@ Les données proviennent des séries officielles de **Our World in Data (OWID)**
 
 ---
 
-## Fonctionnalités
+## Features
 
-- **Scène 3D avec Three.js** : rotation orbitale à la souris, zoom molette, pan clic droit.
-- **Échelle linéaire** : coordonnées proportionnelles aux composantes physiques de l'identité de Kaya.
-- **Ligne temporelle animée (2000 - 2022)** : slider interactif et bouton lecture/pause pour observer l'évolution historique des trajectoires nationales.
-- **Survol et sélection** : infobulle glassmorphic détaillée (drapeau, PIB/hab, intensité énergétique, intensité carbone, population, CO₂).
-- **Recherche de pays** : autocomplétion pour cibler et zoomer directement sur un pays.
-- **Filtres par continent** : activation / désactivation à la volée.
-- **Préréglages de caméra** : vue 3D perspective, projection X-Y, projection X-Z, projection Y-Z.
+- **3D Scene with Three.js**: Orbital mouse rotation, scroll wheel zoom, right-click pan.
+- **Linear scale**: Spatial coordinates directly proportional to the physical Kaya terms.
+- **Bilingual Interface (FR / EN)**: Automatically detects browser language and includes a manual toggle button (`FR` / `EN`).
+- **Animated Timeline (2000 – 2022)**: Interactive year slider and Play/Pause button to observe the historical trajectories of nations.
+- **Hover & Selection**: Detailed glassmorphic tooltip (national flag, GDP/capita, energy intensity, carbon intensity, population, and CO₂ metrics).
+- **Country Search**: Autocomplete input to quickly locate and center the camera on any country (accepts both English and French names).
+- **Continent Filters**: Toggle individual continents on and off.
+- **Camera Presets**: 3D perspective, projection X-Y, projection X-Z, projection Y-Z.
 
 ---
 
-## Intégration sur une page web statique
+## Static Web Page Embedding
 
-Le projet est conçu pour être 100% statique (HTML/CSS/JS, sans serveur d'application ni compilation requise).
+This project is 100% static (HTML/CSS/JS, no build step or backend server required).
 
-### 1. Intégration via `<iframe>`
+### 1. Embedding via `<iframe>`
 
-Vous pouvez insérer la visualisation dans n'importe quel site ou article statique :
+You can embed the visualization into any static website, CMS, or blog (Jekyll, Hugo, WordPress, etc.):
 
 ```html
 <div style="position: relative; width: 100%; height: 620px; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb;">
   <iframe 
     src="index.html?embed=true" 
     style="width: 100%; height: 100%; border: none;"
-    title="Visualisation 3D de l'Identité de Kaya"
+    title="3D Visualization of the Kaya Identity"
     loading="lazy"
     allowfullscreen>
   </iframe>
 </div>
 ```
 
-Le paramètre `?embed=true` adapte automatiquement l'interface pour un affichage compact dans un conteneur ou un article de blog. Voir [embed_example.html](file:///home/goulu/Documents/develop/kaya/embed_example.html) pour une démonstration complète.
+The `?embed=true` URL parameter adjusts the UI into a compact layout tailored for iframes and article containers. See [embed_example.html](file:///home/goulu/Documents/develop/kaya/embed_example.html) for a complete example.
 
-### 2. Test en local
+### 2. Local Testing
 
-Pour tester localement la visualisation :
+To test the visualization locally:
 
 ```bash
-# Lancer un serveur statique léger
+# Start a lightweight static server
 python3 -m http.server 8000
 ```
 
-Puis ouvrir dans votre navigateur : `http://localhost:8000`
+Then open `http://localhost:8000` in your browser.
 
 ---
 
-## Structure du projet
+## Project Structure
 
 ```
 kaya/
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml      # Workflow de déploiement automatique sur GitHub Pages
-├── index.html              # Page principale de visualisation 3D
-├── embed_example.html      # Exemple d'intégration dans une page web statique
-├── README.md               # Documentation du projet
+│       └── deploy.yml      # Automated GitHub Pages deployment workflow
+├── index.html              # Main interactive 3D visualization page
+├── embed_example.html      # Static embed example (iframe demo)
+├── README.md               # Project documentation
 ├── css/
-│   └── style.css           # Thème sombre glassmorphic et responsive
+│   └── style.css           # Glassmorphism dark theme and responsive layout
 ├── js/
-│   └── app.js              # Moteur Three.js, contrôles et interactivité
+│   └── app.js              # Three.js engine, controls, and multilingual logic
 ├── data/
-│   ├── kaya_data.json      # Données des 164 pays (2000-2022) au format JSON
-│   └── kaya_data.js        # Données injectées (support local file:// sans restriction CORS)
+│   ├── kaya_data.json      # OWID dataset for 164 countries (2000–2022) in JSON
+│   └── kaya_data.js        # Bundled dataset (for local file:// execution without CORS)
 ├── vendor/
-│   ├── three.min.js        # Bibliothèque Three.js (r128)
-│   └── OrbitControls.js    # Contrôles de caméra Three.js
+│   ├── three.min.js        # Three.js library (r128)
+│   └── OrbitControls.js    # Three.js camera controls
 └── scripts/
-    └── fetch_data.py       # Script d'extraction et de mise à jour des données OWID
+    └── fetch_data.py       # Python script to download and update OWID data
 ```
 
 ---
 
-## Déploiement GitHub Pages
+## GitHub Pages Deployment
 
-Le projet inclut un workflow GitHub Actions automatisé ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)).
+The repository includes a GitHub Actions workflow ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)).
 
-Pour activer la publication sur GitHub Pages :
-1. Sur GitHub, rendez-vous dans **Settings** > **Pages** de votre dépôt.
-2. Sous **Build and deployment** > **Source**, choisissez **GitHub Actions**.
-3. À chaque `push` sur la branche `main`, le site sera automatiquement déployé à l'adresse :  
+To enable GitHub Pages:
+1. In your GitHub repository, navigate to **Settings** > **Pages**.
+2. Under **Build and deployment** > **Source**, choose **GitHub Actions**.
+3. Every push to the `main` branch will automatically deploy the site to:  
    👉 **`https://goulu.github.io/kaya/`**
 
 ---
 
-## Mise à jour des données
+## Updating Data
 
-Pour retélécharger et regénérer les données depuis Our World in Data :
+To re-fetch and generate fresh data from Our World in Data:
 
 ```bash
 python3 scripts/fetch_data.py
 ```
-    

@@ -133,6 +133,13 @@ p.app-subtitle {
   transform: translateY(-1px);
 }
 
+.btn-lang {
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: #93c5fd;
+}
+
 /* Floating Control Bar (Top Right & Bottom) */
 .controls-panel {
   position: absolute;
