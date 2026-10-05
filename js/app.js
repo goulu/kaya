@@ -64,6 +64,7 @@
       modalArticleLink: "Voir sur drgoulu.com",
       modalSourceLink: "Code source",
       modalLicense: "Licence MIT",
+      btnToggleTitle: "Afficher / masquer les paramètres",
       clearSelection: "Tout effacer",
       removeCountryTitle: "Retirer de la sélection"
     },
@@ -123,6 +124,7 @@
       modalArticleLink: "View on drgoulu.com",
       modalSourceLink: "Source code",
       modalLicense: "MIT License",
+      btnToggleTitle: "Show / hide settings",
       clearSelection: "Clear all",
       removeCountryTitle: "Remove from selection"
     }
@@ -195,6 +197,8 @@
   const btnLang = document.getElementById('btn-lang');
   const modalHelp = document.getElementById('help-modal');
   const modalClose = document.getElementById('modal-close');
+  const controlsPanel = document.getElementById('controls-panel');
+  const btnToggleControls = document.getElementById('btn-toggle-controls');
 
   // Detect embed mode
   if (window.location.search.includes('embed=true') || window.location.search.includes('embed=1') || window.self !== window.top) {
@@ -241,12 +245,14 @@
     scene.background = new THREE.Color(0x0b0f19);
     scene.fog = new THREE.FogExp2(0x0b0f19, 0.0035);
 
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+    const w = container && container.clientWidth ? container.clientWidth : window.innerWidth;
+    const h = container && container.clientHeight ? container.clientHeight : window.innerHeight;
+    camera = new THREE.PerspectiveCamera(45, w / h, 1, 1000);
     camera.position.set(90, 80, 110);
 
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(w, h);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.1;
     container.appendChild(renderer.domElement);
@@ -1087,12 +1093,63 @@
     modalHelp.addEventListener('click', (e) => {
       if (e.target === modalHelp) modalHelp.classList.remove('open');
     });
+
+    // Collapsible Controls Panel
+    // Phone (<= 768px): closed by default. Computer (> 768px): open by default.
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    let controlsOpen = !isMobile;
+
+    function updateControlsState(animateTransition = true) {
+      if (!controlsPanel || !btnToggleControls) return;
+      if (!animateTransition) {
+        controlsPanel.style.transition = 'none';
+      }
+      if (controlsOpen) {
+        controlsPanel.classList.remove('is-collapsed');
+        btnToggleControls.setAttribute('aria-expanded', 'true');
+        btnToggleControls.classList.add('active');
+        const arrow = btnToggleControls.querySelector('.btn-toggle-arrow');
+        if (arrow) arrow.textContent = '▲';
+      } else {
+        controlsPanel.classList.add('is-collapsed');
+        btnToggleControls.setAttribute('aria-expanded', 'false');
+        btnToggleControls.classList.remove('active');
+        const arrow = btnToggleControls.querySelector('.btn-toggle-arrow');
+        if (arrow) arrow.textContent = '▼';
+      }
+      if (!animateTransition) {
+        void controlsPanel.offsetHeight; // trigger reflow
+        controlsPanel.style.transition = '';
+      }
+      setTimeout(onWindowResize, 60);
+      setTimeout(onWindowResize, 350);
+    }
+
+    if (btnToggleControls) {
+      updateControlsState(false);
+      btnToggleControls.addEventListener('click', () => {
+        controlsOpen = !controlsOpen;
+        updateControlsState(true);
+      });
+    }
+
+    // ResizeObserver on canvas container
+    if (window.ResizeObserver && container) {
+      const ro = new ResizeObserver(() => {
+        onWindowResize();
+      });
+      ro.observe(container);
+    }
   }
 
   function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
+    if (!renderer || !camera || !container) return;
+    const w = container.clientWidth || window.innerWidth;
+    const h = container.clientHeight || window.innerHeight;
+    if (w === 0 || h === 0) return;
+    camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(w, h);
   }
 
   // Animation Loop

@@ -11,92 +11,98 @@
   <!-- Three.js Canvas Container -->
   <div id="canvas-container"></div>
 
-  <!-- Header Overlay -->
-  <header class="app-header glass-panel">
-    <div class="app-title-row">
-      <h1 class="app-title">
-        <span data-i18n="appTitle">Identité de Kaya 3D</span>
-      </h1>
-      <div style="display: flex; gap: 6px; align-items: center;">
-        <button id="btn-lang" class="btn-icon btn-lang" title="Switch language" aria-label="Langue">EN</button>
-        <button id="btn-help" class="btn-icon" title="Explication de l'identité de Kaya" aria-label="Aide et formule" data-i18n-title="btnHelpTitle">ℹ</button>
+  <!-- Main UI Container (Header & Collapsible Controls) -->
+  <div class="app-ui-container">
+    <header class="app-header glass-panel">
+      <div class="app-title-row">
+        <h1 class="app-title">
+          <span data-i18n="appTitle">Identité de Kaya 3D</span>
+        </h1>
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <button id="btn-lang" class="btn-icon btn-lang" title="Switch language" aria-label="Langue">EN</button>
+          <button id="btn-help" class="btn-icon" title="Explication de l'identité de Kaya" aria-label="Aide et formule" data-i18n-title="btnHelpTitle">ℹ</button>
+          <button id="btn-toggle-controls" class="btn-icon btn-toggle-controls active" title="Afficher / masquer les paramètres" aria-label="Paramètres" data-i18n-title="btnToggleTitle" aria-expanded="true">
+            <span class="btn-toggle-icon">⚙️</span>
+            <span class="btn-toggle-arrow">▼</span>
+          </button>
+        </div>
       </div>
-    </div>
-    <p class="app-subtitle" data-i18n="appSubtitle">
-      Positionnement 3D des pays selon l'équation de Kaya. Rotation à la souris, zoom à la molette.
-    </p>
-  </header>
+      <p class="app-subtitle" data-i18n="appSubtitle">
+        Positionnement 3D des pays selon l'équation de Kaya. Rotation à la souris, zoom à la molette.
+      </p>
+    </header>
 
-  <!-- Controls Panel (Top Right) -->
-  <aside class="controls-panel glass-panel" aria-label="Paramètres de visualisation">
-    <!-- Volume of Sphere Metric -->
-    <div class="control-group">
-      <label for="metric-select" data-i18n="volumeLabel">Volume de la sphère</label>
-      <select id="metric-select" class="custom-select">
-        <option value="pop" selected data-i18n="optPop">Population (habitants)</option>
-        <option value="co2_pc" data-i18n="optCo2Pc">Émissions de CO₂ par habitant (t/hab)</option>
-        <option value="co2" data-i18n="optCo2Tot">Émissions de CO₂ totales (Mt)</option>
-      </select>
-    </div>
-
-    <!-- Year Slider & Play Animation -->
-    <div class="control-group">
-      <label>
-        <span data-i18n="yearLabel">Année</span>
-        <span id="current-year-display" class="current-year-badge">2022</span>
-      </label>
-      <div class="timeline-container">
-        <button id="btn-play" class="btn-play" title="Lancer / Pause l'animation temporelle" aria-label="Lecture" data-i18n-title="btnPlayTitle">▶</button>
-        <input type="range" id="year-slider" class="year-slider" min="2000" max="2022" value="2022" step="1">
+    <!-- Controls Panel (Collapsible) -->
+    <aside id="controls-panel" class="controls-panel glass-panel" aria-label="Paramètres de visualisation">
+      <!-- Volume of Sphere Metric -->
+      <div class="control-group">
+        <label for="metric-select" data-i18n="volumeLabel">Volume de la sphère</label>
+        <select id="metric-select" class="custom-select">
+          <option value="pop" selected data-i18n="optPop">Population (habitants)</option>
+          <option value="co2_pc" data-i18n="optCo2Pc">Émissions de CO₂ par habitant (t/hab)</option>
+          <option value="co2" data-i18n="optCo2Tot">Émissions de CO₂ totales (Mt)</option>
+        </select>
       </div>
-    </div>
 
-    <!-- Country Search -->
-    <div class="control-group">
-      <label for="country-search" data-i18n="searchLabel">Rechercher un pays</label>
-      <input type="text" id="country-search" class="custom-input" placeholder="Ex: France, Chine, Suisse..." data-i18n-placeholder="searchPlaceholder" list="countries-datalist">
-      <datalist id="countries-datalist"></datalist>
-      <div id="selected-countries-tags" class="selected-tags-container"></div>
-    </div>
-
-    <!-- Continent Filter -->
-    <div class="control-group">
-      <label data-i18n="continentsLabel">Filtrer par continent</label>
-      <div class="continent-pills">
-        <button type="button" class="continent-pill active" data-continent="Afrique" style="--pill-color: var(--c-afrique);">
-          <span class="pill-dot" style="background: var(--c-afrique);"></span>
-          <span data-i18n="continent_Afrique">Afrique</span>
-        </button>
-        <button type="button" class="continent-pill active" data-continent="Amériques" style="--pill-color: var(--c-ameriques);">
-          <span class="pill-dot" style="background: var(--c-ameriques);"></span>
-          <span data-i18n="continent_Amériques">Amériques</span>
-        </button>
-        <button type="button" class="continent-pill active" data-continent="Asie" style="--pill-color: var(--c-asie);">
-          <span class="pill-dot" style="background: var(--c-asie);"></span>
-          <span data-i18n="continent_Asie">Asie</span>
-        </button>
-        <button type="button" class="continent-pill active" data-continent="Europe" style="--pill-color: var(--c-europe);">
-          <span class="pill-dot" style="background: var(--c-europe);"></span>
-          <span data-i18n="continent_Europe">Europe</span>
-        </button>
-        <button type="button" class="continent-pill active" data-continent="Océanie" style="--pill-color: var(--c-oceanie);">
-          <span class="pill-dot" style="background: var(--c-oceanie);"></span>
-          <span data-i18n="continent_Océanie">Océanie</span>
-        </button>
+      <!-- Year Slider & Play Animation -->
+      <div class="control-group">
+        <label>
+          <span data-i18n="yearLabel">Année</span>
+          <span id="current-year-display" class="current-year-badge">2022</span>
+        </label>
+        <div class="timeline-container">
+          <button id="btn-play" class="btn-play" title="Lancer / Pause l'animation temporelle" aria-label="Lecture" data-i18n-title="btnPlayTitle">▶</button>
+          <input type="range" id="year-slider" class="year-slider" min="2000" max="2022" value="2022" step="1">
+        </div>
       </div>
-    </div>
 
-    <!-- Camera View Presets -->
-    <div class="control-group">
-      <label data-i18n="viewsLabel">Vues de projection</label>
-      <div class="views-row">
-        <button type="button" class="view-btn active" data-view="3d" data-i18n="view3d">3D</button>
-        <button type="button" class="view-btn" data-view="xy" data-i18n="viewXY">X - Y</button>
-        <button type="button" class="view-btn" data-view="xz" data-i18n="viewXZ">X - Z</button>
-        <button type="button" class="view-btn" data-view="yz" data-i18n="viewYZ">Y - Z</button>
+      <!-- Country Search -->
+      <div class="control-group">
+        <label for="country-search" data-i18n="searchLabel">Rechercher un pays</label>
+        <input type="text" id="country-search" class="custom-input" placeholder="Ex: France, Chine, Suisse..." data-i18n-placeholder="searchPlaceholder" list="countries-datalist">
+        <datalist id="countries-datalist"></datalist>
+        <div id="selected-countries-tags" class="selected-tags-container"></div>
       </div>
-    </div>
-  </aside>
+
+      <!-- Continent Filter -->
+      <div class="control-group">
+        <label data-i18n="continentsLabel">Filtrer par continent</label>
+        <div class="continent-pills">
+          <button type="button" class="continent-pill active" data-continent="Afrique" style="--pill-color: var(--c-afrique);">
+            <span class="pill-dot" style="background: var(--c-afrique);"></span>
+            <span data-i18n="continent_Afrique">Afrique</span>
+          </button>
+          <button type="button" class="continent-pill active" data-continent="Amériques" style="--pill-color: var(--c-ameriques);">
+            <span class="pill-dot" style="background: var(--c-ameriques);"></span>
+            <span data-i18n="continent_Amériques">Amériques</span>
+          </button>
+          <button type="button" class="continent-pill active" data-continent="Asie" style="--pill-color: var(--c-asie);">
+            <span class="pill-dot" style="background: var(--c-asie);"></span>
+            <span data-i18n="continent_Asie">Asie</span>
+          </button>
+          <button type="button" class="continent-pill active" data-continent="Europe" style="--pill-color: var(--c-europe);">
+            <span class="pill-dot" style="background: var(--c-europe);"></span>
+            <span data-i18n="continent_Europe">Europe</span>
+          </button>
+          <button type="button" class="continent-pill active" data-continent="Océanie" style="--pill-color: var(--c-oceanie);">
+            <span class="pill-dot" style="background: var(--c-oceanie);"></span>
+            <span data-i18n="continent_Océanie">Océanie</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Camera View Presets -->
+      <div class="control-group">
+        <label data-i18n="viewsLabel">Vues de projection</label>
+        <div class="views-row">
+          <button type="button" class="view-btn active" data-view="3d" data-i18n="view3d">3D</button>
+          <button type="button" class="view-btn" data-view="xy" data-i18n="viewXY">X - Y</button>
+          <button type="button" class="view-btn" data-view="xz" data-i18n="viewXZ">X - Z</button>
+          <button type="button" class="view-btn" data-view="yz" data-i18n="viewYZ">Y - Z</button>
+        </div>
+      </div>
+    </aside>
+  </div>
 
   <!-- Hover Tooltip -->
   <div id="tooltip" role="tooltip" aria-hidden="true">

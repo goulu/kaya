@@ -67,25 +67,40 @@ html, body {
   pointer-events: auto;
 }
 
-/* Header overlay */
-header.app-header {
+/* UI Container (Header & Collapsible Controls) */
+.app-ui-container {
   position: absolute;
   top: 16px;
   left: 16px;
   z-index: 10;
-  padding: 12px 18px;
-  max-width: 480px;
+  width: 330px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+header.app-header {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  max-width: none;
+  padding: 12px 16px;
+  pointer-events: auto;
 }
 
 .app-title-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
 }
 
 h1.app-title {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 700;
   letter-spacing: -0.01em;
   color: #fff;
@@ -95,7 +110,7 @@ h1.app-title {
 }
 
 p.app-subtitle {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--text-muted);
   margin-top: 4px;
   line-height: 1.35;
@@ -106,8 +121,9 @@ p.app-subtitle {
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: var(--text-main);
   border-radius: 8px;
-  width: 30px;
+  min-width: 30px;
   height: 30px;
+  padding: 0 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -127,19 +143,71 @@ p.app-subtitle {
   font-size: 0.72rem;
   letter-spacing: 0.04em;
   color: #93c5fd;
+  width: 30px;
+  padding: 0;
 }
 
-/* Floating Control Bar (Top Right & Bottom) */
+.btn-toggle-controls {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+}
+
+.btn-toggle-icon {
+  font-size: 0.82rem;
+  line-height: 1;
+}
+
+.btn-toggle-arrow {
+  font-size: 0.62rem;
+  transition: transform 0.25s ease;
+  line-height: 1;
+  color: var(--text-muted);
+}
+
+.btn-toggle-controls.active .btn-toggle-arrow {
+  transform: rotate(180deg);
+}
+
+/* Controls Panel (Collapsible) */
 .controls-panel {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 10;
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
   padding: 14px 16px;
-  width: 320px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 13px;
+  pointer-events: auto;
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, padding 0.3s ease, margin 0.3s ease;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.controls-panel::-webkit-scrollbar {
+  width: 5px;
+}
+
+.controls-panel::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.controls-panel.is-collapsed {
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  border-width: 0;
+  pointer-events: none;
+  overflow: hidden;
 }
 
 .control-group {
@@ -411,8 +479,8 @@ select.custom-select:focus, input.custom-input:focus {
 
 /* Floating Tooltip */
 #tooltip {
-  position: absolute;
-  z-index: 20;
+  position: fixed;
+  z-index: 50;
   pointer-events: none;
   padding: 10px 14px;
   border-radius: 10px;
@@ -628,42 +696,91 @@ select.custom-select:focus, input.custom-input:focus {
 }
 
 /* Embed Mode overrides */
-body.is-embedded header.app-header {
+body.is-embedded .app-ui-container {
   top: 8px;
   left: 8px;
-  padding: 8px 12px;
-  max-width: 320px;
+  width: 290px;
 }
 
 body.is-embedded h1.app-title {
   font-size: 0.95rem;
 }
 
-body.is-embedded .controls-panel {
-  top: 8px;
-  right: 8px;
-  width: 270px;
-  padding: 10px 12px;
-  gap: 10px;
-}
-
-/* Responsive adjustments */
-@media (max-width: 860px) {
-  .controls-panel {
-    width: 260px;
+/* Responsive / Mobile layout */
+@media (max-width: 768px) {
+  body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
   }
-}
 
-@media (max-width: 640px) {
-  header.app-header {
-    width: calc(100% - 32px);
+  .app-ui-container {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
     max-width: none;
+    max-height: none;
+    flex-shrink: 0;
+    pointer-events: auto;
+    background: rgba(11, 15, 25, 0.96);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    padding: 8px 12px;
+    gap: 0;
   }
+
+  header.app-header {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  h1.app-title {
+    font-size: 1rem;
+  }
+
+  p.app-subtitle {
+    display: none;
+  }
+
   .controls-panel {
+    border-radius: 8px;
+    margin-top: 8px;
+    max-height: 52vh;
+    overflow-y: auto;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: none;
+    padding: 12px;
+  }
+
+  .controls-panel.is-collapsed {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    border: none;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  #canvas-container {
+    position: relative;
     top: auto;
-    bottom: 12px;
-    right: 12px;
-    left: 12px;
-    width: auto;
+    left: auto;
+    flex: 1;
+    width: 100%;
+    height: auto;
+    min-height: 0;
   }
 }
