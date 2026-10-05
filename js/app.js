@@ -60,7 +60,9 @@
       modalYDesc: "Intensité énergétique du PIB : quantité d'énergie nécessaire pour générer un dollar de richesse (kWh / $).",
       modalZDesc: "Intensité carbone du mix énergétique : masse de CO₂ émise par unité d'énergie consommée (g CO₂ / kWh).",
       modalP2: "Remarquez que le produit des 3 coordonnées de l'espace donne les émissions par habitant :",
-      modalP3: "Données issues de <a href=\"https://ourworldindata.org\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: #60a5fa;\">Our World in Data (OWID)</a>."
+      modalP3: "Données issues de <a href=\"https://ourworldindata.org\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: #60a5fa;\">Our World in Data (OWID)</a>.",
+      clearSelection: "Tout effacer",
+      removeCountryTitle: "Retirer de la sélection"
     },
     en: {
       pageTitle: "Kaya Identity - 3D Interactive Visualization",
@@ -114,7 +116,9 @@
       modalYDesc: "Energy intensity of GDP: amount of energy needed to generate one dollar of GDP (kWh / $).",
       modalZDesc: "Carbon intensity of energy: mass of CO₂ emitted per unit of energy consumed (g CO₂ / kWh).",
       modalP2: "Note that the product of the 3 spatial coordinates equals emissions per capita:",
-      modalP3: "Data from <a href=\"https://ourworldindata.org\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: #60a5fa;\">Our World in Data (OWID)</a>."
+      modalP3: "Data from <a href=\"https://ourworldindata.org\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: #60a5fa;\">Our World in Data (OWID)</a>.",
+      clearSelection: "Clear all",
+      removeCountryTitle: "Remove from selection"
     }
   };
 
@@ -150,6 +154,7 @@
     isPlaying: false,
     selectedCountry: null,
     hoveredCountry: null,
+    searchedCountries: new Set(), // Set of ISO codes that stay opaque
     activeContinents: new Set(['Afrique', 'Amériques', 'Asie', 'Europe', 'Océanie']),
     boxSize: 80,         // 3D bounding box dimension
     animationTimer: null
@@ -177,6 +182,7 @@
   const btnPlay = document.getElementById('btn-play');
   const metricSelect = document.getElementById('metric-select');
   const countrySearch = document.getElementById('country-search');
+  const selectedTagsContainer = document.getElementById('selected-countries-tags');
   const datalistCountries = document.getElementById('countries-datalist');
   const btnHelp = document.getElementById('btn-help');
   const btnLang = document.getElementById('btn-lang');
@@ -467,7 +473,10 @@
         roughness: 0.35,
         metalness: 0.15,
         emissive: colorHex,
-        emissiveIntensity: 0.08
+        emissiveIntensity: 0.08,
+        transparent: true,
+        opacity: 1.0,
+        depthWrite: true
       });
 
       const mesh = new THREE.Mesh(sphereGeo, mat);
@@ -538,6 +547,86 @@
     });
   }
 
+  // Opacity and selection management for searched countries
+  function updateCountryOpacities() {
+    const hasSelection = state.searchedCountries.size > 0;
+    countryMeshes.forEach((mesh, iso) => {
+      const isSearched = state.searchedCountries.has(iso);
+      if (hasSelection) {
+        if (isSearched) {
+          mesh.material.opacity = 1.0;
+          mesh.material.depthWrite = true;
+          mesh.material.emissiveIntensity = 0.35;
+        } else {
+          mesh.material.opacity = 0.18;
+          mesh.material.depthWrite = false;
+          mesh.material.emissiveIntensity = 0.04;
+        }
+      } else {
+        mesh.material.opacity = 1.0;
+        mesh.material.depthWrite = true;
+        mesh.material.emissiveIntensity = 0.08;
+      }
+    });
+    renderSelectedTags();
+  }
+
+  function renderSelectedTags() {
+    if (!selectedTagsContainer) return;
+    selectedTagsContainer.innerHTML = '';
+    if (state.searchedCountries.size === 0) return;
+
+    const t = I18N[state.lang];
+    const isEn = state.lang === 'en';
+
+    state.searchedCountries.forEach(iso => {
+      const c = data.countries.find(x => x.iso === iso);
+      if (!c) return;
+
+      const name = isEn ? (c.name_en || c.name) : c.name;
+      const tag = document.createElement('span');
+      tag.className = 'country-tag';
+      tag.innerHTML = `<span>${c.flag || '🌐'}</span><span>${name}</span><button type="button" class="tag-remove" data-iso="${iso}" title="${t.removeCountryTitle}">&times;</button>`;
+      tag.querySelector('.tag-remove').addEventListener('click', (e) => {
+        e.stopPropagation();
+        removeSearchedCountry(iso);
+      });
+      tag.addEventListener('click', () => {
+        focusOnCountry(iso);
+      });
+      selectedTagsContainer.appendChild(tag);
+    });
+
+    const clearBtn = document.createElement('button');
+    clearBtn.type = 'button';
+    clearBtn.className = 'btn-clear-tags';
+    clearBtn.textContent = t.clearSelection;
+    clearBtn.addEventListener('click', () => {
+      clearSearchedCountries();
+    });
+    selectedTagsContainer.appendChild(clearBtn);
+  }
+
+  function addSearchedCountry(iso) {
+    if (!iso) return;
+    state.searchedCountries.add(iso);
+    updateCountryOpacities();
+    focusOnCountry(iso);
+    if (countrySearch) {
+      countrySearch.value = '';
+    }
+  }
+
+  function removeSearchedCountry(iso) {
+    state.searchedCountries.delete(iso);
+    updateCountryOpacities();
+  }
+
+  function clearSearchedCountries() {
+    state.searchedCountries.clear();
+    updateCountryOpacities();
+  }
+
   // Raycaster & Interactivity
   function onPointerMove(event) {
     const rect = renderer.domElement.getBoundingClientRect();
@@ -555,6 +644,9 @@
         resetHover();
         state.hoveredCountry = hitMesh;
         hitMesh.material.emissiveIntensity = 0.55;
+        if (state.searchedCountries.size > 0 && !state.searchedCountries.has(hitMesh.userData.iso)) {
+          hitMesh.material.opacity = 0.75;
+        }
         document.body.style.cursor = 'pointer';
       }
       positionTooltip(event.clientX, event.clientY);
@@ -568,7 +660,15 @@
 
   function resetHover() {
     if (state.hoveredCountry) {
-      state.hoveredCountry.material.emissiveIntensity = 0.08;
+      const iso = state.hoveredCountry.userData.iso;
+      const isSearched = state.searchedCountries.has(iso);
+      if (state.searchedCountries.size > 0) {
+        state.hoveredCountry.material.opacity = isSearched ? 1.0 : 0.18;
+        state.hoveredCountry.material.emissiveIntensity = isSearched ? 0.35 : 0.04;
+      } else {
+        state.hoveredCountry.material.opacity = 1.0;
+        state.hoveredCountry.material.emissiveIntensity = 0.08;
+      }
       state.hoveredCountry = null;
     }
     tooltip.classList.remove('visible');
@@ -744,6 +844,9 @@
     if (state.hoveredCountry) {
       updateTooltipContent(state.hoveredCountry);
     }
+
+    // Refresh selected tags in new language
+    renderSelectedTags();
   }
 
   function toggleLanguage() {
@@ -799,7 +902,7 @@
 
     renderer.domElement.addEventListener('pointerup', () => {
       if (!isDrag && state.hoveredCountry) {
-        focusOnCountry(state.hoveredCountry.userData.iso);
+        addSearchedCountry(state.hoveredCountry.userData.iso);
       }
     });
 
@@ -857,7 +960,26 @@
       );
 
       if (match) {
-        focusOnCountry(match.iso);
+        addSearchedCountry(match.iso);
+      }
+    });
+
+    countrySearch.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const q = countrySearch.value.trim().toLowerCase();
+        if (!q) return;
+
+        const match = data.countries.find(c => 
+          (c.name && c.name.toLowerCase() === q) || 
+          (c.name_en && c.name_en.toLowerCase() === q) || 
+          c.iso.toLowerCase() === q ||
+          (c.name && c.name.toLowerCase().startsWith(q)) || 
+          (c.name_en && c.name_en.toLowerCase().startsWith(q))
+        );
+
+        if (match) {
+          addSearchedCountry(match.iso);
+        }
       }
     });
 

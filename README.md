@@ -42,7 +42,7 @@ Data is retrieved from official datasets by **Our World in Data (OWID)**:
 - **Bilingual Interface (FR / EN)**: Automatically detects browser language and includes a manual toggle button (`FR` / `EN`).
 - **Animated Timeline (2000 – 2022)**: Interactive year slider and Play/Pause button to observe the historical trajectories of nations.
 - **Hover & Selection**: Detailed glassmorphic tooltip (national flag, GDP/capita, energy intensity, carbon intensity, population, and CO₂ metrics).
-- **Country Search**: Autocomplete input to quickly locate and center the camera on any country (accepts both English and French names).
+- **Country Search & Comparison**: Search one or several countries (or click directly on spheres); searched countries remain fully opaque while non-searched countries fade to semi-transparency for clear visual comparison.
 - **Continent Filters**: Toggle individual continents on and off.
 - **Camera Presets**: 3D perspective, projection X-Y, projection X-Z, projection Y-Z.
 
