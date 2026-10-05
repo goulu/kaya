@@ -224,6 +224,82 @@ for r in rows:
         'co2': round(co2, 2)             # CO2 total (Mt CO2)
     }
 
+# Extract World data (global Kaya identity for all years)
+world_raw = {}
+for r in rows:
+    if r['country'] == 'World':
+        try:
+            yr = int(r['year'])
+            if MIN_YEAR <= yr <= MAX_YEAR:
+                world_raw[yr] = r
+        except ValueError:
+            pass
+
+# World Bank annual real GDP growth rate for the World (constant fallback from WB API NY.GDP.MKTP.KD.ZG)
+WB_WORLD_GROWTH = {
+    1980: 1.83, 1981: 1.86, 1982: 0.44, 1983: 2.70, 1984: 4.60, 1985: 3.51, 1986: 3.39, 1987: 3.86, 1988: 4.62, 1989: 3.75,
+    1990: 2.91, 1991: 1.48, 1992: 2.05, 1993: 1.80, 1994: 3.34, 1995: 3.20, 1996: 3.73, 1997: 3.99, 1998: 2.76, 1999: 3.50,
+    2000: 4.46, 2001: 2.02, 2002: 2.27, 2003: 3.10, 2004: 4.45, 2005: 4.04, 2006: 4.43, 2007: 4.40, 2008: 2.09, 2009: -1.33,
+    2010: 4.54, 2011: 3.32, 2012: 2.71, 2013: 2.82, 2014: 3.07, 2015: 3.10, 2016: 2.82, 2017: 3.40, 2018: 3.29, 2019: 2.61,
+    2020: -3.07, 2021: 6.22, 2022: 3.10, 2023: 2.86, 2024: 2.90
+}
+
+# Override 2023 and 2024 with freshly fetched WB growth if available
+if 'WLD' in growth_2023: WB_WORLD_GROWTH[2023] = growth_2023['WLD']
+if 'WLD' in growth_2024: WB_WORLD_GROWTH[2024] = growth_2024['WLD']
+
+owid_world_gdp = {yr: float(r['gdp']) for yr, r in world_raw.items() if r['gdp']}
+
+# Continuous global GDP across all years 1980-2024
+world_gdp_continuous = {}
+for yr in range(MIN_YEAR, MAX_YEAR + 1):
+    if yr in owid_world_gdp:
+        world_gdp_continuous[yr] = owid_world_gdp[yr]
+    elif (yr - 1) in world_gdp_continuous and yr in WB_WORLD_GROWTH:
+        world_gdp_continuous[yr] = world_gdp_continuous[yr - 1] * (1.0 + WB_WORLD_GROWTH[yr] / 100.0)
+
+world_data = {}
+for yr in range(MIN_YEAR, MAX_YEAR + 1):
+    if yr not in world_raw:
+        continue
+    r = world_raw[yr]
+    pop = float(r['population']) if r['population'] else None
+    gdp = world_gdp_continuous.get(yr)
+    primary_e = float(r['primary_energy_consumption']) if r['primary_energy_consumption'] else None
+    e_gdp = float(r['energy_per_gdp']) if r['energy_per_gdp'] else None
+    co2_e = float(r['co2_per_unit_energy']) if r['co2_per_unit_energy'] else None
+    co2 = float(r['co2']) if r['co2'] else None
+    co2_pc = float(r['co2_per_capita']) if r['co2_per_capita'] else None
+
+    if pop and gdp:
+        x = gdp / pop
+        y = e_gdp if e_gdp else ((primary_e * 1e9) / gdp if (primary_e and gdp) else None)
+        z = co2_e if co2_e else ((co2 * 1e3) / primary_e if (co2 and primary_e and primary_e > 0) else None)
+        if co2 is None and primary_e and z:
+            co2 = (primary_e * z) / 1e3
+        if co2_pc is None and co2 and pop:
+            co2_pc = (co2 * 1e6) / pop
+
+        if x and y and z and pop and co2 is not None and co2_pc is not None:
+            world_data[str(yr)] = {
+                'x': round(x, 1),
+                'y': round(y, 3),
+                'z': round(z, 1),
+                'pop': int(pop),
+                'co2_pc': round(co2_pc, 2),
+                'co2': round(co2, 2)
+            }
+
+world_entry = {
+    'iso': 'WLD',
+    'name': 'Monde',
+    'name_en': 'World',
+    'region': 'Monde',
+    'region_en': 'World',
+    'flag': '🌍',
+    'data': world_data
+}
+
 # Keep only countries that have at least 1 valid year of data
 valid_countries = [
     c for c in countries.values()
@@ -261,6 +337,7 @@ metadata = {
 
 output_payload = {
     'metadata': metadata,
+    'world': world_entry,
     'countries': valid_countries
 }
 

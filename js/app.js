@@ -178,6 +178,7 @@
   // Three.js variables
   let scene, camera, renderer, controls;
   let countryMeshes = new Map();
+  let worldMesh = null;
   let axesGroup, gridGroup, labelsGroup;
   let raycaster, mouse;
   let container;
@@ -212,7 +213,7 @@
       data = window.KAYA_DATA;
     } else {
       try {
-        const resp = await fetch('data/kaya_data.json?v=1980_2024', { cache: 'no-cache' });
+        const resp = await fetch('data/kaya_data.json?v=world_all_years', { cache: 'no-cache' });
         data = await resp.json();
       } catch (err) {
         console.error('Failed to load Kaya data:', err);
@@ -527,6 +528,59 @@
       scene.add(mesh);
       countryMeshes.set(country.iso, mesh);
     });
+
+    // Create World transparent white bubble (non-selectable global reference)
+    if (data.world && data.world.data) {
+      const worldGeo = new THREE.SphereGeometry(1, 36, 36);
+      const worldMat = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        roughness: 0.15,
+        metalness: 0.05,
+        transparent: true,
+        opacity: 0.20,
+        depthWrite: false,
+        side: THREE.FrontSide,
+        emissive: 0xffffff,
+        emissiveIntensity: 0.10
+      });
+      worldMesh = new THREE.Mesh(worldGeo, worldMat);
+      worldMesh.renderOrder = 10;
+
+      // Subtle translucent wireframe overlay
+      const worldWireMat = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.06,
+        depthWrite: false
+      });
+      const worldWire = new THREE.Mesh(worldGeo, worldWireMat);
+      worldMesh.add(worldWire);
+
+      const wYearData = data.world.data[state.year] || Object.values(data.world.data)[0];
+      if (wYearData) {
+        const wPos = getCountryPosition(wYearData);
+        worldMesh.position.copy(wPos);
+        const wR = getSphereRadius(wYearData);
+        worldMesh.scale.set(wR, wR, wR);
+
+        worldMesh.userData = {
+          isWorld: true,
+          iso: 'WLD',
+          name: data.world.name || 'Monde',
+          name_en: data.world.name_en || 'World',
+          region: 'Monde',
+          region_en: 'World',
+          flag: '🌍',
+          targetPos: wPos.clone(),
+          targetScale: wR,
+          colorHex: 0xffffff
+        };
+
+        worldMesh.visible = Boolean(data.world.data[state.year]);
+        scene.add(worldMesh);
+      }
+    }
   }
 
   // Update spheres when year, metric or active continents change
@@ -555,6 +609,24 @@
       }
     });
 
+    // Update World transparent bubble
+    if (worldMesh && data.world && data.world.data) {
+      const wYearData = data.world.data[state.year];
+      if (wYearData) {
+        worldMesh.visible = true;
+        const targetPos = getCountryPosition(wYearData);
+        const targetRadius = getSphereRadius(wYearData);
+        worldMesh.userData.targetPos = targetPos;
+        worldMesh.userData.targetScale = targetRadius;
+        if (immediate) {
+          worldMesh.position.copy(targetPos);
+          worldMesh.scale.set(targetRadius, targetRadius, targetRadius);
+        }
+      } else {
+        worldMesh.visible = false;
+      }
+    }
+
     if (state.hoveredCountry) {
       if (!state.hoveredCountry.visible) {
         resetHover();
@@ -575,6 +647,14 @@
       const newScale = THREE.MathUtils.lerp(currentScale, targetScale, 0.1);
       mesh.scale.set(newScale, newScale, newScale);
     });
+
+    if (worldMesh && worldMesh.visible) {
+      worldMesh.position.lerp(worldMesh.userData.targetPos, 0.1);
+      const currentScale = worldMesh.scale.x;
+      const targetScale = worldMesh.userData.targetScale;
+      const newScale = THREE.MathUtils.lerp(currentScale, targetScale, 0.1);
+      worldMesh.scale.set(newScale, newScale, newScale);
+    }
   }
 
   // Opacity and selection management for searched countries
@@ -665,6 +745,7 @@
 
     raycaster.setFromCamera(mouse, camera);
 
+    // Prioritize country spheres
     const visibleMeshes = Array.from(countryMeshes.values()).filter(m => m.visible);
     const intersects = raycaster.intersectObjects(visibleMeshes);
 
@@ -681,6 +762,23 @@
       }
       positionTooltip(event.clientX, event.clientY);
       updateTooltipContent(hitMesh);
+    } else if (worldMesh && worldMesh.visible) {
+      // Hovering the World bubble shows its stats but keeps cursor default (non-selectable)
+      const worldIntersects = raycaster.intersectObject(worldMesh);
+      if (worldIntersects.length > 0) {
+        if (state.hoveredCountry !== worldMesh) {
+          resetHover();
+          state.hoveredCountry = worldMesh;
+          worldMesh.material.emissiveIntensity = 0.35;
+          document.body.style.cursor = 'default';
+        }
+        positionTooltip(event.clientX, event.clientY);
+        updateTooltipContent(worldMesh);
+      } else {
+        if (state.hoveredCountry) {
+          resetHover();
+        }
+      }
     } else {
       if (state.hoveredCountry) {
         resetHover();
@@ -690,14 +788,18 @@
 
   function resetHover() {
     if (state.hoveredCountry) {
-      const iso = state.hoveredCountry.userData.iso;
-      const isSearched = state.searchedCountries.has(iso);
-      if (state.searchedCountries.size > 0) {
-        state.hoveredCountry.material.opacity = isSearched ? 1.0 : 0.18;
-        state.hoveredCountry.material.emissiveIntensity = isSearched ? 0.35 : 0.04;
+      if (state.hoveredCountry === worldMesh) {
+        worldMesh.material.emissiveIntensity = 0.10;
       } else {
-        state.hoveredCountry.material.opacity = 1.0;
-        state.hoveredCountry.material.emissiveIntensity = 0.08;
+        const iso = state.hoveredCountry.userData.iso;
+        const isSearched = state.searchedCountries.has(iso);
+        if (state.searchedCountries.size > 0) {
+          state.hoveredCountry.material.opacity = isSearched ? 1.0 : 0.18;
+          state.hoveredCountry.material.emissiveIntensity = isSearched ? 0.35 : 0.04;
+        } else {
+          state.hoveredCountry.material.opacity = 1.0;
+          state.hoveredCountry.material.emissiveIntensity = 0.08;
+        }
       }
       state.hoveredCountry = null;
     }
@@ -712,14 +814,35 @@
   }
 
   function updateTooltipContent(mesh) {
-    const country = data.countries.find(c => c.iso === mesh.userData.iso);
-    if (!country) return;
-    const yearData = country.data[state.year];
-    if (!yearData) return;
+    let yearData;
+    let name;
+    let region;
+    let flag;
+    let colorHex;
 
     const t = I18N[state.lang];
     const isEn = state.lang === 'en';
     const numLocale = isEn ? 'en-US' : 'fr-FR';
+
+    if (mesh === worldMesh || (mesh && mesh.userData && mesh.userData.isWorld)) {
+      if (!data.world || !data.world.data) return;
+      yearData = data.world.data[state.year];
+      if (!yearData) return;
+      name = isEn ? (data.world.name_en || 'World') : (data.world.name || 'Monde');
+      region = isEn ? 'Global Total & Average' : 'Total et moyenne mondiale';
+      flag = '🌍';
+      colorHex = 0xffffff;
+    } else {
+      const country = data.countries.find(c => c.iso === mesh.userData.iso);
+      if (!country) return;
+      yearData = country.data[state.year];
+      if (!yearData) return;
+
+      name = isEn ? (country.name_en || country.name) : country.name;
+      region = isEn ? (country.region_en || country.region) : country.region;
+      flag = country.flag || '🌐';
+      colorHex = mesh.userData.colorHex;
+    }
 
     const flagEl = document.getElementById('tooltip-flag');
     const nameEl = document.getElementById('tooltip-name');
@@ -731,11 +854,11 @@
     const co2PcValEl = document.getElementById('tooltip-co2-pc');
     const co2TotValEl = document.getElementById('tooltip-co2-tot');
 
-    flagEl.textContent = country.flag || '🌐';
-    nameEl.textContent = isEn ? (country.name_en || country.name) : country.name;
-    continentEl.textContent = isEn ? (country.region_en || country.region) : country.region;
-    continentEl.style.backgroundColor = `rgba(${hexToRgb(mesh.userData.colorHex)}, 0.25)`;
-    continentEl.style.color = `#${mesh.userData.colorHex.toString(16).padStart(6, '0')}`;
+    flagEl.textContent = flag;
+    nameEl.textContent = name;
+    continentEl.textContent = region;
+    continentEl.style.backgroundColor = `rgba(${hexToRgb(colorHex)}, 0.25)`;
+    continentEl.style.color = `#${colorHex.toString(16).padStart(6, '0')}`;
 
     xValEl.textContent = `${yearData.x.toLocaleString(numLocale)} ${t.unitX}`;
     yValEl.textContent = `${yearData.y.toLocaleString(numLocale)} ${t.unitY}`;
@@ -1017,7 +1140,7 @@
     });
 
     renderer.domElement.addEventListener('pointerup', () => {
-      if (!isDrag && state.hoveredCountry) {
+      if (!isDrag && state.hoveredCountry && state.hoveredCountry !== worldMesh) {
         addSearchedCountry(state.hoveredCountry.userData.iso);
       }
     });
