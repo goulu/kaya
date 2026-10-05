@@ -697,13 +697,13 @@
 
 				if ( scope.enabled === false ) return;
 
-				switch ( event.pointerType ) {
+				if ( event.pointerType === 'touch' ) {
 
-					case 'mouse':
-					case 'pen':
-						onMouseDown( event );
-						break;
-        // TODO touch
+					onTouchStart( event );
+
+				} else {
+
+					onMouseDown( event );
 
 				}
 
@@ -713,13 +713,13 @@
 
 				if ( scope.enabled === false ) return;
 
-				switch ( event.pointerType ) {
+				if ( event.pointerType === 'touch' ) {
 
-					case 'mouse':
-					case 'pen':
-						onMouseMove( event );
-						break;
-        // TODO touch
+					onTouchMove( event );
+
+				} else {
+
+					onMouseMove( event );
 
 				}
 
@@ -727,13 +727,13 @@
 
 			function onPointerUp( event ) {
 
-				switch ( event.pointerType ) {
+				if ( event.pointerType === 'touch' ) {
 
-					case 'mouse':
-					case 'pen':
-						onMouseUp( event );
-						break;
-        // TODO touch
+					onTouchEnd( event );
+
+				} else {
+
+					onMouseUp( event );
 
 				}
 
@@ -818,6 +818,8 @@
 
 					scope.domElement.ownerDocument.addEventListener( 'pointermove', onPointerMove );
 					scope.domElement.ownerDocument.addEventListener( 'pointerup', onPointerUp );
+					scope.domElement.ownerDocument.addEventListener( 'mousemove', onMouseMove );
+					scope.domElement.ownerDocument.addEventListener( 'mouseup', onMouseUp );
 					scope.dispatchEvent( _startEvent );
 
 				}
@@ -854,6 +856,8 @@
 
 				scope.domElement.ownerDocument.removeEventListener( 'pointermove', onPointerMove );
 				scope.domElement.ownerDocument.removeEventListener( 'pointerup', onPointerUp );
+				scope.domElement.ownerDocument.removeEventListener( 'mousemove', onMouseMove );
+				scope.domElement.ownerDocument.removeEventListener( 'mouseup', onMouseUp );
 				if ( scope.enabled === false ) return;
 				handleMouseUp( event );
 				scope.dispatchEvent( _endEvent );
@@ -997,8 +1001,15 @@
 			} //
 
 
+			if ( scope.domElement.style ) {
+
+				scope.domElement.style.touchAction = 'none';
+
+			}
+
 			scope.domElement.addEventListener( 'contextmenu', onContextMenu );
 			scope.domElement.addEventListener( 'pointerdown', onPointerDown );
+			scope.domElement.addEventListener( 'mousedown', onMouseDown );
 			scope.domElement.addEventListener( 'wheel', onMouseWheel, {
 				passive: false
 			} );

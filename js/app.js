@@ -105,8 +105,13 @@
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.maxDistance = 350;
-    controls.minDistance = 20;
+    controls.enableRotate = true;
+    controls.enableZoom = true;
+    controls.enablePan = true;
+    controls.rotateSpeed = 0.9;
+    controls.zoomSpeed = 1.2;
+    controls.maxDistance = 500;
+    controls.minDistance = 15;
     controls.target.set(0, 0, 0);
 
     // Lights
@@ -522,12 +527,12 @@
         camera.position.set(0, 0, S * 1.6);
         break;
       case 'xz':
-        // X-Z plane (PIB vs Carbon) from Y positive (top down)
-        camera.position.set(0, S * 1.6, 0);
+        // X-Z plane (PIB vs Carbon) from Y positive (top down with tiny epsilon to prevent gimbal singularity)
+        camera.position.set(0.001, S * 1.6, 0);
         break;
       case 'yz':
         // Y-Z plane (Energy vs Carbon) from X positive
-        camera.position.set(S * 1.6, 0, 0);
+        camera.position.set(S * 1.6, 0, 0.001);
         break;
       case '3d':
       default:
@@ -575,8 +580,29 @@
   // Event Listeners
   function setupEventListeners() {
     window.addEventListener('resize', onWindowResize);
-    renderer.domElement.addEventListener('pointermove', onPointerMove);
-    renderer.domElement.addEventListener('click', onPointerClick);
+
+    let pointerDownPos = { x: 0, y: 0 };
+    let isDrag = false;
+
+    renderer.domElement.addEventListener('pointerdown', (e) => {
+      pointerDownPos = { x: e.clientX, y: e.clientY };
+      isDrag = false;
+    });
+
+    renderer.domElement.addEventListener('pointermove', (e) => {
+      const dx = e.clientX - pointerDownPos.x;
+      const dy = e.clientY - pointerDownPos.y;
+      if (Math.hypot(dx, dy) > 5) {
+        isDrag = true;
+      }
+      onPointerMove(e);
+    });
+
+    renderer.domElement.addEventListener('pointerup', () => {
+      if (!isDrag && state.hoveredCountry) {
+        focusOnCountry(state.hoveredCountry.userData.iso);
+      }
+    });
 
     // Year slider
     yearSlider.addEventListener('input', (e) => {
