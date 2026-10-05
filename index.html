@@ -29,9 +29,9 @@
       <div class="control-group">
         <label for="metric-select" data-i18n="volumeLabel">Volume de la sphère</label>
         <select id="metric-select" class="custom-select">
-          <option value="pop" selected data-i18n="optPop">Population (habitants)</option>
+          <option value="pop" data-i18n="optPop">Population (habitants)</option>
           <option value="co2_pc" data-i18n="optCo2Pc">Émissions de CO₂ par habitant (t/hab)</option>
-          <option value="co2" data-i18n="optCo2Tot">Émissions de CO₂ totales (Mt)</option>
+          <option value="co2" selected data-i18n="optCo2Tot">Émissions de CO₂ totales (Mt)</option>
         </select>
       </div>
 
@@ -39,11 +39,11 @@
       <div class="control-group">
         <label>
           <span data-i18n="yearLabel">Année</span>
-          <span id="current-year-display" class="current-year-badge">2022</span>
+          <span id="current-year-display" class="current-year-badge">2000</span>
         </label>
         <div class="timeline-container">
-          <button id="btn-play" class="btn-play" title="Lancer / Pause l'animation temporelle" aria-label="Lecture" data-i18n-title="btnPlayTitle">▶</button>
-          <input type="range" id="year-slider" class="year-slider" min="2000" max="2022" value="2022" step="1">
+          <button id="btn-play" class="btn-play" title="Lancer / Pause l'animation temporelle" aria-label="Lecture" data-i18n-title="btnPlayTitle">❚❚</button>
+          <input type="range" id="year-slider" class="year-slider" min="2000" max="2022" value="2000" step="1">
         </div>
       </div>
     </div>

@@ -157,8 +157,8 @@
   // State
   const state = {
     lang: detectInitialLanguage(),
-    year: 2022,
-    metric: 'pop',       // 'pop' | 'co2_pc' | 'co2'
+    year: 2000,
+    metric: 'co2',       // 'pop' | 'co2_pc' | 'co2'
     isPlaying: false,
     selectedCountry: null,
     hoveredCountry: null,
@@ -220,11 +220,12 @@
       }
     }
 
-    state.year = data.metadata.default_year || 2022;
+    state.year = data.metadata.min_year || 2000;
     yearSlider.min = data.metadata.min_year;
     yearSlider.max = data.metadata.max_year;
     yearSlider.value = state.year;
     yearDisplay.textContent = state.year;
+    metricSelect.value = state.metric;
 
     setupThreeScene();
     setupAxesAndGrids();
@@ -233,6 +234,9 @@
 
     // Apply active language to DOM and 3D labels
     applyLanguage(state.lang);
+
+    // Start timeline animation by default
+    togglePlay();
 
     animate();
   }
