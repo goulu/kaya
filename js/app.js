@@ -20,13 +20,19 @@
   const state = {
     year: 2022,
     metric: 'pop',       // 'pop' | 'co2_pc' | 'co2'
-    scaleMode: 'log',    // 'log' | 'linear'
     isPlaying: false,
     selectedCountry: null,
     hoveredCountry: null,
     activeContinents: new Set(['Afrique', 'Amériques', 'Asie', 'Europe', 'Océanie']),
     boxSize: 80,         // 3D bounding box dimension
     animationTimer: null
+  };
+
+  // Linear scale bounds for 3D axes
+  const LINEAR_BOUNDS = {
+    x: { min: 0, max: 140000 },  // $/hab
+    y: { min: 0, max: 5.0 },     // kWh/$
+    z: { min: 0, max: 800 }      // g CO2/kWh
   };
 
   // Three.js variables
@@ -240,15 +246,12 @@
   }
 
   function createAxisTicks(origin, halfS) {
-    const isLog = state.scaleMode === 'log';
-    const ranges = data.metadata.ranges;
-
-    // X Ticks
-    const xValues = isLog ? [1000, 5000, 20000, 100000] : [1000, 40000, 80000, 140000];
+    // X Ticks (PIB/hab in $)
+    const xValues = [20000, 40000, 60000, 80000, 100000, 120000];
     xValues.forEach(val => {
-      const norm = normalizeValue(val, ranges.x.min, ranges.x.max, isLog);
+      const norm = normalizeValue(val, LINEAR_BOUNDS.x.min, LINEAR_BOUNDS.x.max);
       const posX = -halfS + norm * (halfS * 2);
-      const text = val >= 1000 ? `${val / 1000}k$` : `${val}$`;
+      const text = `${val / 1000}k$`;
       const sprite = createTextSprite(text, '#9ca3af', 20, 'normal');
       sprite.scale.set(12, 3, 1);
       sprite.position.set(posX, -halfS - 4, -halfS);
@@ -256,9 +259,9 @@
     });
 
     // Y Ticks (Energy / GDP in kWh/$)
-    const yValues = isLog ? [0.2, 0.5, 1.0, 3.0] : [0.2, 1.0, 2.5, 5.0];
+    const yValues = [1.0, 2.0, 3.0, 4.0, 5.0];
     yValues.forEach(val => {
-      const norm = normalizeValue(val, ranges.y.min, ranges.y.max, isLog);
+      const norm = normalizeValue(val, LINEAR_BOUNDS.y.min, LINEAR_BOUNDS.y.max);
       const posY = -halfS + norm * (halfS * 2);
       const sprite = createTextSprite(`${val} kWh`, '#9ca3af', 20, 'normal');
       sprite.scale.set(14, 3, 1);
@@ -267,9 +270,9 @@
     });
 
     // Z Ticks (CO2 / Energy in g CO2 / kWh)
-    const zValues = isLog ? [60, 150, 300, 600] : [60, 250, 500, 800];
+    const zValues = [200, 400, 600, 800];
     zValues.forEach(val => {
-      const norm = normalizeValue(val, ranges.z.min, ranges.z.max, isLog);
+      const norm = normalizeValue(val, LINEAR_BOUNDS.z.min, LINEAR_BOUNDS.z.max);
       const posZ = -halfS + norm * (halfS * 2);
       const sprite = createTextSprite(`${val} g`, '#9ca3af', 20, 'normal');
       sprite.scale.set(12, 3, 1);
@@ -278,30 +281,18 @@
     });
   }
 
-  // Normalize a value between [0, 1]
-  function normalizeValue(val, minVal, maxVal, isLog) {
-    if (isLog) {
-      const safeVal = Math.max(val, 0.001);
-      const safeMin = Math.max(minVal, 0.001);
-      const safeMax = Math.max(maxVal, safeMin * 1.01);
-      const logVal = Math.log10(safeVal);
-      const logMin = Math.log10(safeMin);
-      const logMax = Math.log10(safeMax);
-      return Math.min(Math.max((logVal - logMin) / (logMax - logMin), 0), 1);
-    } else {
-      return Math.min(Math.max((val - minVal) / (maxVal - minVal), 0), 1);
-    }
+  // Linear normalization between [0, 1]
+  function normalizeValue(val, minVal, maxVal) {
+    return Math.min(Math.max((val - minVal) / (maxVal - minVal), 0), 1);
   }
 
-  // Compute 3D position from country data for a specific year
+  // Compute 3D position from country data for a specific year (linear scale)
   function getCountryPosition(countryRecord) {
-    const ranges = data.metadata.ranges;
-    const isLog = state.scaleMode === 'log';
     const halfS = state.boxSize / 2;
 
-    const normX = normalizeValue(countryRecord.x, ranges.x.min, ranges.x.max, isLog);
-    const normY = normalizeValue(countryRecord.y, ranges.y.min, ranges.y.max, isLog);
-    const normZ = normalizeValue(countryRecord.z, ranges.z.min, ranges.z.max, isLog);
+    const normX = normalizeValue(countryRecord.x, LINEAR_BOUNDS.x.min, LINEAR_BOUNDS.x.max);
+    const normY = normalizeValue(countryRecord.y, LINEAR_BOUNDS.y.min, LINEAR_BOUNDS.y.max);
+    const normZ = normalizeValue(countryRecord.z, LINEAR_BOUNDS.z.min, LINEAR_BOUNDS.z.max);
 
     return new THREE.Vector3(
       -halfS + normX * state.boxSize,
@@ -619,18 +610,6 @@
       updateCountrySpheres();
     });
 
-    // Scale mode buttons (log vs linear)
-    document.querySelectorAll('[data-scale]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const mode = btn.dataset.scale;
-        if (state.scaleMode === mode) return;
-        state.scaleMode = mode;
-        document.querySelectorAll('[data-scale]').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        setupAxesAndGrids();
-        updateCountrySpheres();
-      });
-    });
 
     // View buttons
     document.querySelectorAll('[data-view]').forEach(btn => {

@@ -38,7 +38,7 @@ Les données proviennent des séries officielles de **Our World in Data (OWID)**
 ## Fonctionnalités
 
 - **Scène 3D avec Three.js** : rotation orbitale à la souris, zoom molette, pan clic droit.
-- **Échelle Logarithmique / Linéaire** : passage instantané avec réajustement des axes et repères.
+- **Échelle linéaire** : coordonnées proportionnelles aux composantes physiques de l'identité de Kaya.
 - **Ligne temporelle animée (2000 - 2022)** : slider interactif et bouton lecture/pause pour observer l'évolution historique des trajectoires nationales.
 - **Survol et sélection** : infobulle glassmorphic détaillée (drapeau, PIB/hab, intensité énergétique, intensité carbone, population, CO₂).
 - **Recherche de pays** : autocomplétion pour cibler et zoomer directement sur un pays.
