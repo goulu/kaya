@@ -341,22 +341,23 @@ select.custom-select:focus, input.custom-input:focus {
 .views-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 3px;
 }
 
 .view-btn {
-  flex: 1 1 calc(25% - 4px);
-  min-width: 56px;
+  flex: 1 1 0;
+  min-width: 0;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text-muted);
-  font-size: 0.72rem;
-  padding: 5px 4px;
+  font-size: 0.70rem;
+  padding: 4px 2px;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
   text-align: center;
   white-space: nowrap;
+  letter-spacing: -0.01em;
 }
 
 .view-btn:hover {
@@ -690,9 +691,16 @@ body.is-embedded h1.app-title {
     gap: 6px;
   }
 
-  /* Stack projection buttons 2x2 */
+  /* Projection buttons remain on 1 row */
+  .views-row {
+    gap: 3px;
+  }
+
   .views-row .view-btn {
-    flex: 1 1 calc(50% - 4px);
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 4px 2px;
+    font-size: 0.68rem;
   }
 
   /* Stack continent buttons 3 + 2 */
@@ -771,12 +779,17 @@ body.is-embedded h1.app-title {
     white-space: nowrap;
   }
 
-  /* Views buttons stacked 2x2 */
+  /* Views buttons compact on a single line */
+  .views-row {
+    gap: 2px;
+  }
+
   .views-row .view-btn {
-    flex: 1 1 calc(50% - 4px);
+    flex: 1 1 0;
     min-width: 0;
-    padding: 4px 2px;
-    font-size: 0.68rem;
+    padding: 3px 1px;
+    font-size: 0.64rem;
+    letter-spacing: -0.02em;
   }
 }
 
@@ -793,7 +806,14 @@ body.is-embedded h1.app-title {
     flex: 1 1 calc(50% - 4px);
   }
 
+  .views-row {
+    gap: 3px;
+  }
+
   .views-row .view-btn {
-    flex: 1 1 calc(50% - 4px);
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 4px 2px;
+    font-size: 0.68rem;
   }
 }
