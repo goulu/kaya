@@ -174,6 +174,7 @@
   let raycaster, mouse;
   let container;
   let data = null;
+  let cameraAnimation = null;
 
   // DOM Elements
   const tooltip = document.getElementById('tooltip');
@@ -255,6 +256,11 @@
     controls.maxDistance = 500;
     controls.minDistance = 15;
     controls.target.set(0, 0, 0);
+
+    // Cancel programmatic camera transition on manual user interaction
+    controls.addEventListener('start', () => {
+      cameraAnimation = null;
+    });
 
     // Lights
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
@@ -724,6 +730,7 @@
 
   // Focus camera on a country
   function focusOnCountry(iso) {
+    cameraAnimation = null;
     const mesh = countryMeshes.get(iso);
     if (!mesh) return;
 
@@ -737,34 +744,119 @@
     }, 700);
   }
 
+  // Easing function for camera animation
+  function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  // Smooth orbital camera animation
+  function startCameraAnimation(destPos, destTarget = new THREE.Vector3(0, 0, 0), duration = 1000) {
+    // Reset residual damping momentum
+    controls.enableDamping = false;
+    controls.update();
+    controls.enableDamping = true;
+
+    const startTarget = controls.target.clone();
+    const endTarget = destTarget.clone();
+
+    const startOffset = camera.position.clone().sub(startTarget);
+    const endOffset = destPos.clone().sub(endTarget);
+
+    const startSpherical = new THREE.Spherical().setFromVector3(startOffset);
+    const endSpherical = new THREE.Spherical().setFromVector3(endOffset);
+
+    // Guard phi from gimbal lock singularities
+    startSpherical.phi = Math.max(0.0001, Math.min(Math.PI - 0.0001, startSpherical.phi));
+    endSpherical.phi = Math.max(0.0001, Math.min(Math.PI - 0.0001, endSpherical.phi));
+
+    // Shortest angular path around azimuth theta
+    let dTheta = (endSpherical.theta - startSpherical.theta) % (2 * Math.PI);
+    if (dTheta > Math.PI) dTheta -= 2 * Math.PI;
+    if (dTheta < -Math.PI) dTheta += 2 * Math.PI;
+
+    cameraAnimation = {
+      startTime: performance.now(),
+      duration,
+      startTarget,
+      endTarget,
+      startSpherical,
+      endSpherical,
+      dTheta,
+      destPos
+    };
+  }
+
+  function updateCameraAnimation(now) {
+    if (!cameraAnimation) return;
+
+    const elapsed = now - cameraAnimation.startTime;
+    const progress = Math.min(elapsed / cameraAnimation.duration, 1);
+    const ease = easeInOutCubic(progress);
+
+    const currentTarget = new THREE.Vector3().lerpVectors(
+      cameraAnimation.startTarget,
+      cameraAnimation.endTarget,
+      ease
+    );
+
+    const currentRadius = THREE.MathUtils.lerp(
+      cameraAnimation.startSpherical.radius,
+      cameraAnimation.endSpherical.radius,
+      ease
+    );
+
+    const currentPhi = THREE.MathUtils.lerp(
+      cameraAnimation.startSpherical.phi,
+      cameraAnimation.endSpherical.phi,
+      ease
+    );
+
+    const currentTheta = cameraAnimation.startSpherical.theta + cameraAnimation.dTheta * ease;
+
+    const currentSpherical = new THREE.Spherical(currentRadius, currentPhi, currentTheta);
+    const currentOffset = new THREE.Vector3().setFromSpherical(currentSpherical);
+
+    camera.position.copy(currentTarget).add(currentOffset);
+    controls.target.copy(currentTarget);
+    camera.lookAt(controls.target);
+
+    if (progress >= 1) {
+      camera.position.copy(cameraAnimation.destPos);
+      controls.target.copy(cameraAnimation.endTarget);
+      controls.update();
+      cameraAnimation = null;
+    }
+  }
+
   // Camera presets
   function setView(viewType) {
     const S = state.boxSize;
-    controls.target.set(0, 0, 0);
 
     document.querySelectorAll('.view-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.view === viewType);
     });
 
+    let destPos;
     switch (viewType) {
       case 'xy':
         // X-Y plane (PIB vs Energy) from Z positive
-        camera.position.set(0, 0, S * 1.6);
+        destPos = new THREE.Vector3(0, 0, S * 1.6);
         break;
       case 'xz':
-        // X-Z plane (PIB vs Carbon) from Y positive (top down with tiny epsilon to prevent gimbal singularity)
-        camera.position.set(0.001, S * 1.6, 0);
+        // X-Z plane (PIB vs Carbon) from Y positive
+        destPos = new THREE.Vector3(0, S * 1.6, 0.001);
         break;
       case 'yz':
         // Y-Z plane (Energy vs Carbon) from X positive
-        camera.position.set(S * 1.6, 0, 0.001);
+        destPos = new THREE.Vector3(S * 1.6, 0, 0.001);
         break;
       case '3d':
       default:
-        camera.position.set(S * 1.1, S * 1.0, S * 1.3);
+        destPos = new THREE.Vector3(S * 1.1, S * 1.0, S * 1.3);
         break;
     }
-    controls.update();
+
+    startCameraAnimation(destPos, new THREE.Vector3(0, 0, 0), 1000);
   }
 
   // Search autocomplete setup
@@ -998,9 +1090,15 @@
   }
 
   // Animation Loop
-  function animate() {
+  function animate(timestamp) {
     requestAnimationFrame(animate);
-    controls.update();
+
+    if (cameraAnimation) {
+      updateCameraAnimation(timestamp || performance.now());
+    } else {
+      controls.update();
+    }
+
     animateSpheres();
     renderer.render(scene, camera);
   }
