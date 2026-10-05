@@ -708,58 +708,48 @@ body.is-embedded h1.app-title {
 
 /* Responsive / Mobile layout */
 @media (max-width: 768px) {
-  body {
+  .app-ui-container {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    width: auto;
+    max-width: none;
+    max-height: calc(100vh - 20px);
+    z-index: 10;
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    height: 100dvh;
-    overflow: hidden;
-  }
-
-  .app-ui-container {
-    position: relative;
-    top: 0;
-    left: 0;
-    width: 100%;
-    max-width: none;
-    max-height: none;
-    flex-shrink: 0;
-    pointer-events: auto;
-    background: rgba(11, 15, 25, 0.96);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-    padding: 8px 12px;
-    gap: 0;
+    gap: 8px;
+    pointer-events: none;
   }
 
   header.app-header {
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    padding: 0;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    pointer-events: auto;
+    width: 100%;
+    padding: 10px 14px;
+  }
+
+  .app-title-row {
+    gap: 8px;
   }
 
   h1.app-title {
-    font-size: 1rem;
+    font-size: 1.05rem;
   }
 
   p.app-subtitle {
-    display: none;
+    font-size: 0.72rem;
+    margin-top: 2px;
+    line-height: 1.25;
   }
 
   .controls-panel {
-    border-radius: 8px;
-    margin-top: 8px;
-    max-height: 52vh;
+    pointer-events: auto;
+    width: 100%;
+    max-height: calc(100vh - 110px);
     overflow-y: auto;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: none;
-    padding: 12px;
+    padding: 12px 14px;
+    gap: 11px;
   }
 
   .controls-panel.is-collapsed {
@@ -772,15 +762,5 @@ body.is-embedded h1.app-title {
     border: none;
     pointer-events: none;
     overflow: hidden;
-  }
-
-  #canvas-container {
-    position: relative;
-    top: auto;
-    left: auto;
-    flex: 1;
-    width: 100%;
-    height: auto;
-    min-height: 0;
   }
 }
