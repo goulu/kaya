@@ -14,6 +14,8 @@ The **volume of each sphere** can be dynamically toggled between:
 1. **Population** (number of people)
 2. **CO₂ emissions per capita** (tonnes of CO₂ / person)
 3. **Total CO₂ emissions** (million tonnes of CO₂)
+4. **Total consumption-based CO₂ emissions** (million tonnes of CO₂)
+5. **Consumption-based CO₂ emissions per capita** (tonnes of CO₂ / person)
 
 The **color of each sphere** corresponds to its continent:
 - 🟡 **Africa** (`#f59e0b`)
@@ -26,12 +28,13 @@ The **color of each sphere** corresponds to its continent:
 
 ## Data Sources
 
-Data is retrieved from official datasets by **Our World in Data (OWID)**:
+Data is retrieved from official datasets by **Our World in Data (OWID)** and the **Global Carbon Project (GCP)**:
 
 - GDP per capita: [OWID - GDP per capita](https://ourworldindata.org/gdp-per-capita)
 - Energy intensity of GDP: [OWID - Energy intensity of GDP](https://ourworldindata.org/energy-intensity-of-gdp)
 - CO2 per unit of energy: [OWID - CO2 per unit of energy](https://ourworldindata.org/co2-per-unit-of-energy)
 - Population: [OWID - Population](https://ourworldindata.org/population)
+- Consumption-based CO2 emissions: [OWID - Consumption-based CO2 emissions](https://ourworldindata.org/grapher/consumption-co2-emissions)
 
 ---
 

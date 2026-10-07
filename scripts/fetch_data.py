@@ -3,17 +3,19 @@
 Script to download and process Kaya identity indicators from Our World in Data (OWID),
 World Bank GDP projections, and country metadata (ISO codes, French translations, flags, continents).
 
-Kaya Identity:
-CO2 = POP * (GDP / POP) * (Energy / GDP) * (CO2 / Energy)
-  - X = GDP / POP (GDP per capita in $ / person)
-  - Y = Energy / GDP (Energy intensity of GDP in kWh / $)
-  - Z = CO2 / Energy (Carbon intensity of energy in g CO2 / kWh)
-  - Volume metrics:
-      1. Population (persons)
-      2. CO2 emissions per capita (tonnes CO2 / person)
-      3. Total CO2 emissions (Million tonnes CO2)
-
-Years covered: 1980 to 2024 (1980 is the first year with >= 100 complete countries).
+ * Kaya Identity:
+ * CO2 = POP * (GDP / POP) * (Energy / GDP) * (CO2 / Energy)
+ *   - X = GDP / POP (GDP per capita in $ / person)
+ *   - Y = Energy / GDP (Energy intensity of GDP in kWh / $)
+ *   - Z = CO2 / Energy (Carbon intensity of energy in g CO2 / kWh)
+ *   - Volume metrics:
+ *       1. Population (persons)
+ *       2. CO2 emissions per capita (tonnes CO2 / person)
+ *       3. Total CO2 emissions (Million tonnes CO2)
+ *       4. Total consumption-based CO2 emissions (Million tonnes CO2)
+ *       5. Consumption-based CO2 emissions per capita (tonnes CO2 / person)
+ * 
+ * Years covered: 1980 to 2024 (1980 is the first year with >= 100 complete countries).
 Missing data is completed by mathematical calculation whenever possible.
 Countries with absent data for a given year are omitted for that specific year.
 """
@@ -139,6 +141,8 @@ for r in rows:
     co2_e = float(r['co2_per_unit_energy']) if r['co2_per_unit_energy'] else None
     co2 = float(r['co2']) if r['co2'] else None
     co2_pc = float(r['co2_per_capita']) if r['co2_per_capita'] else None
+    cons_co2 = float(r['consumption_co2']) if r.get('consumption_co2') else None
+    cons_co2_pc = float(r['consumption_co2_per_capita']) if r.get('consumption_co2_per_capita') else None
 
     # Derive missing GDP for 2023 & 2024 using World Bank annual real GDP growth rate
     if gdp is None and iso in gdp_2022_map:
@@ -196,6 +200,12 @@ for r in rows:
     if co2 is None or co2 < 0 or co2_pc is None or co2_pc < 0:
         continue
 
+    # Derive missing consumption-based CO2 if one is present and pop is valid
+    if cons_co2 is None and cons_co2_pc is not None and pop > 0:
+        cons_co2 = (cons_co2_pc * pop) / 1e6
+    elif cons_co2_pc is None and cons_co2 is not None and pop > 0:
+        cons_co2_pc = (cons_co2 * 1e6) / pop
+
     # Initialize country metadata entry if not already present
     if iso not in countries:
         meta = geo_info.get(iso, {
@@ -221,7 +231,9 @@ for r in rows:
         'z': round(z_val, 1),            # CO2 / E (g CO2 / kWh)
         'pop': int(pop),                 # POP (habitants)
         'co2_pc': round(co2_pc, 2),      # CO2 / POP (tonnes / hab)
-        'co2': round(co2, 2)             # CO2 total (Mt CO2)
+        'co2': round(co2, 2),            # CO2 total (Mt CO2)
+        'cons_co2': round(cons_co2, 2) if cons_co2 is not None else None,
+        'cons_co2_pc': round(cons_co2_pc, 2) if cons_co2_pc is not None else None
     }
 
 # Extract World data (global Kaya identity for all years)
@@ -270,6 +282,8 @@ for yr in range(MIN_YEAR, MAX_YEAR + 1):
     co2_e = float(r['co2_per_unit_energy']) if r['co2_per_unit_energy'] else None
     co2 = float(r['co2']) if r['co2'] else None
     co2_pc = float(r['co2_per_capita']) if r['co2_per_capita'] else None
+    cons_co2 = float(r['consumption_co2']) if r.get('consumption_co2') else None
+    cons_co2_pc = float(r['consumption_co2_per_capita']) if r.get('consumption_co2_per_capita') else None
 
     if pop and gdp:
         x = gdp / pop
@@ -280,6 +294,11 @@ for yr in range(MIN_YEAR, MAX_YEAR + 1):
         if co2_pc is None and co2 and pop:
             co2_pc = (co2 * 1e6) / pop
 
+        if cons_co2 is None and cons_co2_pc is not None and pop > 0:
+            cons_co2 = (cons_co2_pc * pop) / 1e6
+        elif cons_co2_pc is None and cons_co2 is not None and pop > 0:
+            cons_co2_pc = (cons_co2 * 1e6) / pop
+
         if x and y and z and pop and co2 is not None and co2_pc is not None:
             world_data[str(yr)] = {
                 'x': round(x, 1),
@@ -287,7 +306,9 @@ for yr in range(MIN_YEAR, MAX_YEAR + 1):
                 'z': round(z, 1),
                 'pop': int(pop),
                 'co2_pc': round(co2_pc, 2),
-                'co2': round(co2, 2)
+                'co2': round(co2, 2),
+                'cons_co2': round(cons_co2, 2) if cons_co2 is not None else None,
+                'cons_co2_pc': round(cons_co2_pc, 2) if cons_co2_pc is not None else None
             }
 
 world_entry = {
@@ -316,6 +337,8 @@ all_z = [d['z'] for c in valid_countries for d in c['data'].values()]
 all_pop = [d['pop'] for c in valid_countries for d in c['data'].values()]
 all_co2_pc = [d['co2_pc'] for c in valid_countries for d in c['data'].values()]
 all_co2 = [d['co2'] for c in valid_countries for d in c['data'].values()]
+all_cons_co2 = [d['cons_co2'] for c in valid_countries for d in c['data'].values() if d.get('cons_co2') is not None]
+all_cons_co2_pc = [d['cons_co2_pc'] for c in valid_countries for d in c['data'].values() if d.get('cons_co2_pc') is not None]
 
 metadata = {
     'updated': '2026',
@@ -330,7 +353,19 @@ metadata = {
         'z': {'min': min(all_z), 'max': max(all_z), 'unit': 'g CO₂/kWh', 'label': 'Intensité carbone de l’énergie'},
         'pop': {'min': min(all_pop), 'max': max(all_pop), 'unit': 'habitants', 'label': 'Population'},
         'co2_pc': {'min': min(all_co2_pc), 'max': max(all_co2_pc), 'unit': 't CO₂/hab', 'label': 'Émissions CO₂ par habitant'},
-        'co2': {'min': min(all_co2), 'max': max(all_co2), 'unit': 'Mt CO₂', 'label': 'Émissions CO₂ totales'}
+        'co2': {'min': min(all_co2), 'max': max(all_co2), 'unit': 'Mt CO₂', 'label': 'Émissions CO₂ totales'},
+        'cons_co2': {
+            'min': min(all_cons_co2) if all_cons_co2 else 0,
+            'max': max(all_cons_co2) if all_cons_co2 else 1,
+            'unit': 'Mt CO₂',
+            'label': 'Émissions totales basées sur la consommation'
+        },
+        'cons_co2_pc': {
+            'min': min(all_cons_co2_pc) if all_cons_co2_pc else 0,
+            'max': max(all_cons_co2_pc) if all_cons_co2_pc else 1,
+            'unit': 't CO₂/hab',
+            'label': 'Émissions basées sur la consommation par habitant'
+        }
     },
     'continents': ['Afrique', 'Amériques', 'Asie', 'Europe', 'Océanie']
 }

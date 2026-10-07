@@ -20,6 +20,8 @@
       optPop: "Population (habitants)",
       optCo2Pc: "Émissions de CO₂ par habitant (t/hab)",
       optCo2Tot: "Émissions de CO₂ totales (Mt)",
+      optConsCo2Tot: "Émissions totales basées sur la consommation (Mt)",
+      optConsCo2Pc: "Émissions basées sur la consommation par habitant (t/hab)",
       yearLabel: "Année",
       btnPlayTitle: "Lancer / Pause l'animation temporelle",
       searchLabel: "Rechercher un pays",
@@ -53,6 +55,8 @@
       tooltipPopLabel: "Population :",
       tooltipCo2PcLabel: "CO₂ / habitant :",
       tooltipCo2TotLabel: "CO₂ total :",
+      tooltipConsCo2TotLabel: "CO₂ conso. total :",
+      tooltipConsCo2PcLabel: "CO₂ conso. / habitant :",
       modalTitle: "L'Identité de Kaya",
       modalP1: "L'<strong>identité de Kaya</strong> relie les émissions mondiales ou nationales de dioxyde de carbone (CO₂) à des facteurs démographiques, économiques et énergétiques :",
       modalPopDesc: "Population humaine du pays ou de la région.",
@@ -80,6 +84,8 @@
       optPop: "Population (people)",
       optCo2Pc: "CO₂ emissions per capita (t/person)",
       optCo2Tot: "Total CO₂ emissions (Mt)",
+      optConsCo2Tot: "Total consumption-based CO₂ emissions (Mt)",
+      optConsCo2Pc: "Consumption-based CO₂ emissions per capita (t/person)",
       yearLabel: "Year",
       btnPlayTitle: "Play / Pause timeline animation",
       searchLabel: "Search country",
@@ -113,6 +119,8 @@
       tooltipPopLabel: "Population:",
       tooltipCo2PcLabel: "CO₂ / capita:",
       tooltipCo2TotLabel: "Total CO₂:",
+      tooltipConsCo2TotLabel: "Total consumption CO₂:",
+      tooltipConsCo2PcLabel: "Consumption CO₂ / capita:",
       modalTitle: "The Kaya Identity",
       modalP1: "The <strong>Kaya identity</strong> expresses total carbon dioxide (CO₂) emissions as the product of demographic, economic, and energy factors:",
       modalPopDesc: "Human population of the country or region.",
@@ -158,7 +166,7 @@
   const state = {
     lang: detectInitialLanguage(),
     year: 1980,
-    metric: 'co2',       // 'pop' | 'co2_pc' | 'co2'
+    metric: 'co2',       // 'pop' | 'co2_pc' | 'co2' | 'cons_co2' | 'cons_co2_pc'
     isPlaying: false,
     selectedCountry: null,
     hoveredCountry: null,
@@ -213,7 +221,7 @@
       data = window.KAYA_DATA;
     } else {
       try {
-        const resp = await fetch('data/kaya_data.json?v=world_all_years', { cache: 'no-cache' });
+        const resp = await fetch('data/kaya_data.json?v=consumption_co2', { cache: 'no-cache' });
         data = await resp.json();
       } catch (err) {
         console.error('Failed to load Kaya data:', err);
@@ -466,14 +474,20 @@
   // r = R_max * (val / maxVal)^(1/3)
   function getSphereRadius(countryRecord) {
     const metric = state.metric;
-    const maxVal = data.metadata.ranges[metric].max;
-    const val = Math.max(0, countryRecord[metric] || 0);
+    const range = data.metadata.ranges[metric];
+    const maxVal = range ? range.max : 1;
+    const rawVal = countryRecord ? countryRecord[metric] : null;
 
-    // Maximum radius for the country with highest value (China for pop/co2, Qatar/Trinidad for co2_pc)
-    const R_max = (metric === 'co2_pc') ? 5.5 : 7.0;
+    // Maximum radius for the country with highest value (China for pop/co2/cons_co2, Qatar/Trinidad for co2_pc/cons_co2_pc)
+    const R_max = (metric === 'co2_pc' || metric === 'cons_co2_pc') ? 5.5 : 7.0;
+
+    if (rawVal == null || rawVal <= 0) {
+      // If data is unavailable (e.g. consumption data before 1990), show as minimal threshold
+      return 0.35;
+    }
 
     // Strict linear volume: V proportional to val => r proportional to cbrt(val)
-    const linearR = R_max * Math.cbrt(val / maxVal);
+    const linearR = R_max * Math.cbrt(rawVal / maxVal);
 
     // Minor minimum threshold (0.35) so tiny islands remain visible and clickable
     return Math.max(0.35, linearR);
@@ -853,6 +867,8 @@
     const popValEl = document.getElementById('tooltip-pop');
     const co2PcValEl = document.getElementById('tooltip-co2-pc');
     const co2TotValEl = document.getElementById('tooltip-co2-tot');
+    const consCo2TotValEl = document.getElementById('tooltip-cons-co2-tot');
+    const consCo2PcValEl = document.getElementById('tooltip-cons-co2-pc');
 
     flagEl.textContent = flag;
     nameEl.textContent = name;
@@ -866,6 +882,17 @@
     popValEl.textContent = yearData.pop.toLocaleString(numLocale);
     co2PcValEl.textContent = `${yearData.co2_pc.toLocaleString(numLocale)} ${t.unitCo2Pc}`;
     co2TotValEl.textContent = `${yearData.co2.toLocaleString(numLocale)} ${t.unitCo2Tot}`;
+
+    if (consCo2TotValEl) {
+      consCo2TotValEl.textContent = (yearData.cons_co2 != null)
+        ? `${yearData.cons_co2.toLocaleString(numLocale)} ${t.unitCo2Tot}`
+        : (isEn ? 'N/A' : 'N/D');
+    }
+    if (consCo2PcValEl) {
+      consCo2PcValEl.textContent = (yearData.cons_co2_pc != null)
+        ? `${yearData.cons_co2_pc.toLocaleString(numLocale)} ${t.unitCo2Pc}`
+        : (isEn ? 'N/A' : 'N/D');
+    }
   }
 
   function hexToRgb(hex) {

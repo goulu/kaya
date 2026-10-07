@@ -35,6 +35,8 @@
           <option value="pop" data-i18n="optPop">Population (habitants)</option>
           <option value="co2_pc" data-i18n="optCo2Pc">Émissions de CO₂ par habitant (t/hab)</option>
           <option value="co2" selected data-i18n="optCo2Tot">Émissions de CO₂ totales (Mt)</option>
+          <option value="cons_co2" data-i18n="optConsCo2Tot">Émissions totales basées sur la consommation (Mt)</option>
+          <option value="cons_co2_pc" data-i18n="optConsCo2Pc">Émissions basées sur la consommation par habitant (t/hab)</option>
         </select>
       </div>
 
@@ -136,6 +138,14 @@
         <span class="tooltip-stat-label" data-i18n="tooltipCo2TotLabel">CO₂ total :</span>
         <span class="tooltip-stat-val" id="tooltip-co2-tot">-</span>
       </div>
+      <div class="tooltip-stat-row">
+        <span class="tooltip-stat-label" data-i18n="tooltipConsCo2TotLabel">CO₂ conso. total :</span>
+        <span class="tooltip-stat-val" id="tooltip-cons-co2-tot">-</span>
+      </div>
+      <div class="tooltip-stat-row">
+        <span class="tooltip-stat-label" data-i18n="tooltipConsCo2PcLabel">CO₂ conso. / hab :</span>
+        <span class="tooltip-stat-val" id="tooltip-cons-co2-pc">-</span>
+      </div>
     </div>
   </div>
 
@@ -211,7 +221,7 @@
   <!-- Scripts -->
   <script src="vendor/three.min.js"></script>
   <script src="vendor/OrbitControls.js"></script>
-  <script src="data/kaya_data.js?v=world_all_years"></script>
-  <script src="js/app.js?v=world_all_years"></script>
+  <script src="data/kaya_data.js?v=consumption_co2"></script>
+  <script src="js/app.js?v=consumption_co2"></script>
 </body>
 </html>
